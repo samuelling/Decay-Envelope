@@ -102,62 +102,97 @@ html,body{height:100%;margin:0;background:var(--panel);color:var(--silk);overflo
 
 <div id="veil"><div class="card" id="card"></div></div>
 <script>
-// ===== DATA: modules, words =====
+// ===== DATA: modules, levels, words =====
 // World units are millimetres. 1 HP = 5.08 mm, 3U panel = 128.5 mm tall.
 const HP = 5.08, U3 = 128.5;
 
+// Panels. x/y are fractions of the panel; knob = [x,y,radius mm,label], jack = [x,y,label]. The last jack is the module's OUT.
+const MODS = {
+  VCO:{ name:'Origin', hp:10, field:null,
+    knobs:[[.5,.17,6.2,'FREQ'],[.5,.42,4.2,'FINE'],[.28,.6,3.0,'PW'],[.72,.6,3.0,'FM']],
+    jacks:[[.25,.76,'1V/OCT'],[.75,.76,'SYNC'],[.2,.89,'SAW'],[.5,.89,'SQR'],[.8,.89,'OUT']] },
+  LFO:{ name:'Tide', hp:12, field:'tide',
+    knobs:[[.5,.2,7.0,'RATE'],[.3,.47,4.0,'SHAPE'],[.7,.47,4.0,'DEPTH']],
+    jacks:[[.22,.72,'RESET'],[.5,.72,'CV'],[.78,.72,'TRI'],[.3,.88,'SQR'],[.7,.88,'OUT']] },
+  SEQ:{ name:'Steps', hp:16, field:'steps',
+    knobs:[[.25,.2,4.2,'RATE'],[.75,.2,4.2,'LENGTH']],
+    jacks:[[.2,.9,'CLK'],[.4,.9,'RESET'],[.6,.9,'GATE'],[.8,.9,'OUT']] },
+  VCF:{ name:'Resonance', hp:16, field:'peaks',
+    knobs:[[.5,.17,8.0,'CUTOFF'],[.22,.47,4.6,'RES'],[.78,.47,4.6,'ENV']],
+    jacks:[[.2,.72,'IN'],[.4,.72,'CV'],[.6,.72,'FM'],[.8,.72,'Q'],[.3,.88,'LP'],[.7,.88,'OUT']] },
+  ENV:{ name:'Contour', hp:12, field:'adsr',
+    knobs:[[.25,.2,3.4,'A'],[.75,.2,3.4,'D'],[.25,.32,3.4,'S'],[.75,.32,3.4,'R']],
+    jacks:[[.25,.91,'GATE'],[.75,.91,'OUT']] },
+  VCA:{ name:'Attenuation', hp:20, field:'dark',
+    knobs:[[.3,.2,6.5,'GAIN'],[.7,.2,6.5,'BIAS'],[.5,.46,5.0,'RESP']],
+    jacks:[[.18,.7,'IN 1'],[.39,.7,'CV 1'],[.61,.7,'IN 2'],[.82,.7,'CV 2'],[.3,.87,'MIX'],[.7,.87,'OUT']] },
+  DLY:{ name:'Echo', hp:14, field:'echo',
+    knobs:[[.3,.2,5.0,'TIME'],[.7,.2,5.0,'FDBK'],[.5,.46,4.0,'MIX']],
+    jacks:[[.2,.7,'IN'],[.4,.7,'CLK'],[.6,.7,'CV'],[.8,.7,'WET'],[.3,.87,'DRY'],[.7,.87,'OUT']] },
+  OUT:{ name:'Release', hp:28, field:null,
+    knobs:[[.24,.22,7.0,'LEVEL'],[.5,.22,7.0,'VERB'],[.76,.22,7.0,'TONE']],
+    jacks:[[.15,.7,'L'],[.32,.7,'R'],[.5,.7,'AUX'],[.68,.7,'SEND'],[.85,.7,'RTN'],[.5,.87,'MAIN OUT']] },
+};
+
 const LEVELS = [
-  { id:'VCO', name:'Origin', hp:10, start:0.5, goal:3.0, pulseEvery:8, scrollers:2, field:null,
-    knobs:[[.5,.17,6.2,'FREQ'],[.5,.42,4.2,'FINE'],[.28,.56,3.0,'PW'],[.72,.56,3.0,'FM']],
-    jacks:[[.25,.74,'1V/OCT'],[.75,.74,'SYNC'],[.2,.88,'SAW'],[.5,.88,'SQR'],[.8,.88,'OUT']],
+  { mods:['VCO'], start:0.5, goal:3.0, pulseEvery:8, scrollers:2,
     mix:{dust:3,solder:3,screw:2,nut:2,cap:1,led:3,wave:3,spark:3,plug:1},
     memento:{t:'ring',name:"Ilse's ring",line:"Ilse's ring. She took it off to knead bread, and the bread outlived her."},
     intro:["Otto Brandt is eighty-four. He repaired synthesizers in Lindenau for fifty-one years. Nobody has been born in Lindenau for eleven.",
-      "He fell asleep at the bench in front of the rack he built for Ilse in 1979. It has not made a sound since she died. Now he is small enough to walk inside it.",
+      "He fell asleep at the bench in front of the rack he built for Ilse in 1979. It has been silent since she died. Now he is small enough to walk inside it. That slow thump is his heart, or the rack's. He stopped being able to tell years ago.",
       "<em>Roll up what's loose. Grow. When you're big enough, find the OUT jack and patch in.</em>"],
-    line0:"This oscillator used to hum like a refrigerator in love. Nine years of silence. Let's see what's lying around.",
-  },
-  { id:'LFO', name:'Tide', hp:12, start:1.3, goal:6.5, pulseEvery:7, scrollers:4, field:'tide',
-    knobs:[[.5,.2,7.0,'RATE'],[.3,.45,4.0,'SHAPE'],[.7,.45,4.0,'DEPTH']],
-    jacks:[[.22,.72,'RESET'],[.5,.72,'CV'],[.78,.72,'TRI'],[.3,.88,'SQR'],[.7,.88,'OUT']],
+    line0:"This oscillator used to hum like a refrigerator in love. Nine years of silence. Let's see what's lying around." },
+  { mods:['LFO'], start:1.3, goal:5.5, pulseEvery:7, scrollers:3,
     mix:{dust:2,solder:2,screw:2,nut:1,cap:2,res:2,led:3,wave:3,spark:3,plug:2,knobcap:1,heart:1},
-    memento:{t:'glasses',name:'reading glasses',line:"My reading glasses. I stopped reading when the books started reading back."},
+    memento:{t:'glasses',name:'his reading glasses',line:"My reading glasses. I stopped reading when the books started reading back."},
     intro:["A low-frequency oscillator. It moves slower than you can hear, the way a tide moves. Everything in here drifts with it, you included.",
       "The first scrollers live here. They don't move much. They are mostly face, and the face is mostly lit from below.",
       "<em>Ride the current or fight it. Your choice, same as always.</em>"],
-    line0:"Slow modulation. Ilse said I was a slow modulation. She meant it kindly. Mostly.",
-  },
-  { id:'VCF', name:'Resonance', hp:16, start:2.4, goal:10, pulseEvery:6, scrollers:5, field:'peaks',
-    knobs:[[.5,.17,8.0,'CUTOFF'],[.28,.42,4.6,'RES'],[.72,.42,4.6,'ENV']],
-    jacks:[[.2,.7,'IN'],[.4,.7,'CV'],[.6,.7,'FM'],[.8,.7,'Q'],[.3,.87,'LP'],[.7,.87,'OUT']],
+    line0:"Slow modulation. Ilse said I was a slow modulation. She meant it kindly. Mostly." },
+  { mods:['SEQ'], start:2.2, goal:8, pulseEvery:6.5, scrollers:4,
+    mix:{screw:2,nut:2,cap:2,res:2,led:3,wave:2,spark:2,plug:2,seq:3,knobcap:2,heart:1},
+    memento:{t:'ticket',name:'a ticket stub',line:"Kraftwerk, Düsseldorf, 1979. Ilse fell asleep in the second half. I fell in love twice that night."},
+    intro:["A sequencer: eight steps played in a circle, forever, one per half-beat.",
+      "The lit step shoves whatever stands on it toward the next one. Ride the carousel or get thrown off it.",
+      "<em>Somewhere in here is a ticket stub from 1979.</em>"],
+    line0:"Eight steps and back to the start. I had a routine like this. Coffee, bench, solder, bed." },
+  { mods:['VCF'], start:3, goal:10, pulseEvery:6, scrollers:5,
     mix:{screw:2,nut:2,cap:2,res:2,led:3,chip:2,knobcap:3,plug:2,wave:2,spark:2,scope:2,heart:2,badge:1},
     memento:{t:'photo',name:'a photograph',line:"Jonas, age six, in headphones bigger than his head. He listened to everything, then."},
     intro:["A filter decides what gets through. Turn the resonance up and it starts to ring on its own, singing at the one frequency it can't let go of.",
       "Those bright peaks are resonance. They throw you. They throw everything.",
       "<em>Somewhere in here is a photograph Otto would like back.</em>"],
-    line0:"Every filter has a frequency it can't let go of. Mine is a boy with headphones.",
-  },
-  { id:'VCA', name:'Attenuation', hp:20, start:3.6, goal:14, pulseEvery:5, scrollers:8, field:'dark',
-    knobs:[[.3,.2,6.5,'GAIN'],[.7,.2,6.5,'BIAS'],[.5,.44,5.0,'RESP']],
-    jacks:[[.18,.7,'IN 1'],[.39,.7,'CV 1'],[.61,.7,'IN 2'],[.82,.7,'CV 2'],[.3,.87,'MIX'],[.7,.87,'OUT']],
+    line0:"Every filter has a frequency it can't let go of. Mine is a boy with headphones." },
+  { mods:['ENV'], start:3.4, goal:10.5, pulseEvery:6, scrollers:5,
+    mix:{screw:1,cap:2,res:2,led:3,chip:2,knobcap:3,plug:2,wave:3,spark:2,scope:1,heart:2,badge:1},
+    memento:{t:'watch',name:"his father's watch",line:"My father's pocket watch. It still keeps time. Nothing else in the house does."},
+    intro:["An envelope gives a sound its shape: attack, decay, sustain, release. Strike, fall, hold, fade.",
+      "The floor is divided the same way. Attack is fast. Decay drags. Sustain holds steady. Release lets you slide.",
+      "<em>His father's watch is in here. It still ticks.</em>"],
+    line0:"Attack, decay, sustain, release. I'm somewhere around the release, if we're honest." },
+  { mods:['VCA'], start:4, goal:13, pulseEvery:5, scrollers:8,
     mix:{nut:1,cap:1,res:1,chip:2,knobcap:2,plug:2,scope:2,seq:2,spark:2,heart:3,badge:3,phone:2},
     memento:{t:'letter',name:'an unsent letter',line:"The letter I wrote Jonas in '49. Never sent it. I didn't have his handle."},
     intro:["A voltage-controlled amplifier only ever makes things quieter. Gain at zero is silence. This one has been at zero for a long time.",
-      "It's dark in here. The only light is yours, and theirs.",
+      "It's dark in here. The only light is yours, the parts', and theirs.",
       "<em>More scrollers. More of what falls off them.</em>"],
-    line0:"An amplifier that only subtracts. I know the feeling. Turn me up a little.",
-  },
-  { id:'OUT', name:'Release', hp:28, start:5, goal:18, pulseEvery:5, scrollers:12, field:'wake',
-    knobs:[[.24,.2,7.0,'LEVEL'],[.5,.2,7.0,'VERB'],[.76,.2,7.0,'TONE']],
-    jacks:[[.15,.7,'L'],[.32,.7,'R'],[.5,.7,'AUX'],[.68,.7,'SEND'],[.85,.7,'RTN'],[.5,.87,'MAIN OUT']],
-    mix:{chip:1,knobcap:2,plug:2,scope:2,seq:2,cable:2,spark:2,heart:3,badge:3,phone:3},
+    line0:"An amplifier that only subtracts. I know the feeling. Turn me up a little." },
+  { mods:['DLY'], start:4.6, goal:14, pulseEvery:5, scrollers:8,
+    mix:{chip:2,knobcap:2,plug:2,scope:2,seq:2,cable:2,spark:3,wave:2,heart:3,badge:3,phone:2},
+    memento:{t:'drawing',name:"Jonas's drawing",line:"Jonas drew the rack when he was five. He gave it a face. It was smiling."},
+    intro:["A delay plays everything back a moment later, a little quieter. Then again, quieter still.",
+      "In here your echoes follow you, and they pick things up too.",
+      "<em>Look for a child's drawing.</em>"],
+    line0:"Everything I've done comes back half a second late. At least it comes back." },
+  { mods:['VCO','LFO','SEQ','VCF','ENV','VCA','DLY','OUT'], rack:true, start:7, goal:22, pulseEvery:4.5, scrollers:18, wake:true,
+    mix:{led:2,chip:1,knobcap:2,plug:2,scope:2,seq:2,cable:2,spark:3,wave:2,heart:3,badge:3,phone:3},
     memento:{t:'key',name:'the shop key',line:"The key to the shop. Nobody has knocked since the last repair."},
-    intro:["The output stage. Release is the last part of an envelope: the time a sound takes to die away after you let go.",
+    intro:["Every module, side by side. 128 HP of the last working synthesizer in Lindenau, and every module still does what it did.",
       "Everyone is here now. Bump a scroller and their phone falls. Some of them look up. One of them is Jonas.",
-      "<em>Get big enough to fill the room. Then let go.</em>"],
-    line0:"Release. The part of the note after you let go. I've been practising.",
-  },
+      "<em>Roll the whole rack. Then let go at the MAIN OUT, all the way at the end.</em>"],
+    line0:"The whole rack at once. Ilse, listen. It's nearly a song." },
 ];
+const LAST = LEVELS.length-1;
 
 const OTTO = {
   grow:["Dust, solder, a screw from 1983. Everything I dropped finds its way back eventually.",
@@ -184,59 +219,84 @@ const SCROLL = [
   "can you not. i'm grieving a streamer","there's a reel about this exact feeling",
   "my companion app says you're a red flag","i've never heard a sound that wasn't recommended",
   "babies are so 2030","is the sun sponsored","brb, refreshing","i'm not lonely, i'm subscribed",
+  "is that a beat? who's dropping","my heart rate app says that's not mine",
 ];
 const WOKEN = ["...oh. it's loud in here.","what is that sound?","i forgot i had hands.","is it always this bright?",
-  "wait. who made that?","my battery died. what do i do now","hey. hi. hello. is that how it goes?","it's warm."];
+  "wait. who made that?","my battery died. what do i do now","hey. hi. hello. is that how it goes?","it's warm.",
+  "i can feel the kick in my chest","can it play that part again?"];
 const JONAS = {woke:"Papa? ...you shrank.", otto:"No, Jonas. You grew. I just wasn't looking either."};
 
-const SCALE = [0,3,5,7,10]; // minor pentatonic, A
+const SCALE = [0,3,5,7,10]; // A minor pentatonic
+// what each patch adds to the rack's voice
+const HEARD=["A sawtooth. Two of them, a quarter-hertz apart, beating against each other like an old couple sharing a bed.",
+  "Now the pitch drifts. Slow, tidal. It sounds like breathing.",
+  "Notes. An eight-step phrase going round and round, like a man pacing a kitchen.",
+  "The filter opens and closes on its own. The tone has a mouth now.",
+  "Every note has a shape: a strike, a fall, a held breath, a fade. A bass line follows the kick.",
+  "The amplifier opens wide. Hi-hats, ticking like the clock in the hall.",
+  "Every note comes back twice, softer each time, the way memories do.",
+  ""];
 // ===== ENGINE: state, level build, physics =====
-const K_MASS = 0.9;
-const G = { li:0, mode:'title', t:0, keepsakes:0, lookedUp:0, jonas:false, got:[], growth:1.5 };
+const G = { li:0, mode:'title', t:0, keepsakes:0, lookedUp:0, jonas:false, got:[], growth:1.5, kickV:0, darkA:0, echoA:0 };
+const BPM=100, STEP=60/BPM/4, BAR=STEP*16;
 let rnd = Math.random;
 const rand = (a,b)=>a+(b-a)*rnd();
 const pick = a=>a[(rnd()*a.length)|0];
 const clamp=(v,a,b)=>v<a?a:v>b?b:v;
 function wpick(mix){ let tot=0; for(const k in mix) tot+=mix[k]; let u=rnd()*tot; for(const k in mix){ u-=mix[k]; if(u<=0) return k; } return Object.keys(mix)[0]; }
-const COLS = { led:['#ff4b3a','#5cff7a','#ffb547','#6fb6ff'], knobcap:['#d94a3a','#e8e4da','#f2c230','#3a7bd9','#222'], cable:['#d94a3a','#f2c230','#3a7bd9','#e8e4da','#2fbf71'] };
+const ADSR_TOP=.42, ADSR_H=.1; // ENV floor bands, as fractions of panel height
+const ADSR_FX=[{acc:1.8,damp:1},{acc:.75,damp:2.4},{acc:1,damp:1},{acc:1,damp:.2}]; // A D S R
 
 function buildLevel(i){
-  const L = LEVELS[i]; G.L = L; G.li = i;
-  const W = L.hp*HP, H = U3; G.W=W; G.H=H;
-  G.items=[]; G.att=[]; G.fx=[]; G.pulses=[]; G.scrollers=[]; G.peaks=[]; G.mass=0; G.ready=false; G.warn=null;
+  const L = LEVELS[i]; G.L = L; G.li = i; const H=U3; G.H=H;
+  // lay the panels side by side
+  let x0=0; G.panels = L.mods.map(id=>{ const m=MODS[id], w=m.hp*HP, p={id,m,x0,w,field:m.field}; x0+=w; return p; });
+  const W=G.W=x0;
+  G.items=[]; G.att=[]; G.fx=[]; G.pulses=[]; G.scrollers=[]; G.peaks=[]; G.pads=[]; G.trail=[]; G.echoes=[];
+  G.mass=0; G.ready=false; G.warn=null; G.armed=false; G.lastBar=-1;
   G.pulseT = L.pulseEvery*0.6; G.t=0; G.talkCool=0; G.growNext=.3; G.won=false; G.readySaid=false;
-  G.knobs = L.knobs.map(([x,y,r,lab])=>({x:x*W,y:Math.max(y*H,24.5+r*1.42),r,lab,ang:rand(-2.4,2.4)})); // keep labels clear of the header
-  G.jacks = L.jacks.map(([x,y,lab],k)=>({x:x*W,y:y*H,r:2.9,lab,out:k===L.jacks.length-1,blink:0}));
-  // ball start: upper-middle open space
-  const b = G.ball = {x:W*.5,y:H*.3,vx:0,vy:0,r:L.start,spin:0,hurt:0};
-  for(let n=0;n<80;n++){ if(freeAt(b.x,b.y,b.r+1)) break; b.x=rand(6,W-6); b.y=rand(H*.25,H*.6); }
+  G.knobs=[]; G.jacks=[];
+  G.panels.forEach((p,pi)=>{ const m=p.m;
+    for(const [x,y,r,lab] of m.knobs) G.knobs.push({x:p.x0+x*p.w,y:Math.max(y*H,24.5+r*1.42),r,lab,ang:rand(-2.4,2.4)});
+    m.jacks.forEach(([x,y,lab],k)=>G.jacks.push({x:p.x0+x*p.w,y:y*H,r:2.9,lab,out:pi===G.panels.length-1&&k===m.jacks.length-1,blink:0}));
+    if(p.field==='steps'){ const cx=p.x0+p.w/2, cy=H*.56, rx=p.w*.32, ry=H*.19;
+      for(let s=0;s<8;s++){ const a=s/8*6.283-1.571; G.pads.push({x:cx+Math.cos(a)*rx,y:cy+Math.sin(a)*ry,r:4.2,i:s,p}); } }
+  });
+  // ball start: open space near the left
+  const b = G.ball = {x:Math.min(W*.5,G.panels[0].w*.5),y:H*.3,vx:0,vy:0,r:L.start,spin:0,hurt:0};
+  for(let n=0;n<80;n++){ if(freeAt(b.x,b.y,b.r+1)) break; b.x=rand(6,Math.min(W,60)-6); b.y=rand(H*.25,H*.6); }
+  // resonance peaks inside filter panels
+  for(const p of G.panels) if(p.field==='peaks') for(let n=0;n<6;n++){ for(let k=0;k<60;k++){ const x=rand(p.x0+10,p.x0+p.w-10), y=rand(H*.22,H*.85);
+    const o=G.jacks.find(j=>j.out); if(freeAt(x,y,4)&&Math.hypot(x-b.x,y-b.y)>12&&Math.hypot(x-o.x,y-o.y)>16){ G.peaks.push({x,y,r:2.2,ph:rand(0,6),f:rand(.7,1.4)}); break; } } }
   // items: heavy-tailed sizes so there's always something your size
-  G.kM=[.9,.75,.6,.5,.45][i]; const lo=L.start*.22, hi=L.goal*(.55-.04*i), need=(L.goal*L.goal-L.start*L.start)/(G.kM*Math.min(G.growth,1))*3;
+  G.kM=[.9,.8,.7,.6,.55,.5,.47,.42][i];
+  const lo=L.start*.22, hi=L.goal*(.55-.03*i), need=(L.goal*L.goal-L.start*L.start)/(G.kM*Math.min(G.growth,1))*(i<3?3:2.2)*(L.rack?2.6:1), cap=L.rack?2000:720;
   let sum=0, guard=0;
-  while(sum<need && G.items.length<720 && guard++<6000){
+  while(sum<need && G.items.length<cap && guard++<12000){
     const s = lo*Math.pow(hi/lo, Math.pow(rnd(),1.7));
     const x=rand(4+s,W-4-s), y=rand(7+s,H-7-s);
     if(!freeAt(x,y,s+.4)) continue;
     if(Math.hypot(x-b.x,y-b.y)<b.r+s+1) continue;
     G.items.push(mkItem(wpick(L.mix),x,y,s)); sum+=s*s;
   }
-  // a few extra crumbs right around the start so the first seconds feel good
+  // a few crumbs right around the start so the first seconds feel good
   for(let n=0;n<14;n++){ const a=rand(0,6.28), d=rand(b.r*3,b.r*12), s=rand(lo,L.start*.45);
     const x=b.x+Math.cos(a)*d, y=b.y+Math.sin(a)*d; if(x>4&&x<W-4&&y>7&&y<H-7&&freeAt(x,y,s)) G.items.push(mkItem('dust',x,y,s)); }
   // keepsake, far from start
-  for(let n=0;n<200;n++){ const x=rand(8,W-8), y=rand(10,H-10), s=L.start*1.15;
-    if(freeAt(x,y,s+1) && Math.hypot(x-b.x,y-b.y)>H*.35){ const m=mkItem(L.memento.t,x,y,s); m.mem=true; G.items.push(m); break; } }
+  for(let n=0;n<300;n++){ const x=rand(8,W-8), y=rand(10,H-10), s=L.start*1.15;
+    if(freeAt(x,y,s+1) && Math.hypot(x-b.x,y-b.y)>Math.min(W,H)*.35){ const m=mkItem(L.memento.t,x,y,s); m.mem=true; G.items.push(m); break; } }
   // scrollers
   const sh = Math.max(L.goal*.8, L.start*3.2);
-  const jIdx = L.field==='wake' ? (rnd()*L.scrollers)|0 : -1;
+  const jIdx = L.wake ? ((L.scrollers*.5+rnd()*L.scrollers*.5)|0) : -1; // Jonas is in the far half
   for(let n=0;n<L.scrollers;n++){
-    for(let k=0;k<100;k++){ const x=rand(8,W-8), y=rand(H*.2,H*.92);
-      if(freeAt(x,y,sh*.4) && Math.hypot(x-b.x,y-b.y)>sh*1.5){
+    for(let k=0;k<100;k++){ const x=L.rack?rand(W*n/L.scrollers,W*(n+1)/L.scrollers):rand(8,W-8), y=rand(H*.2,H*.92);
+      if(x>8&&x<W-8&&freeAt(x,y,sh*.4) && Math.hypot(x-b.x,y-b.y)>sh*1.5){
         G.scrollers.push({x,y,vx:0,vy:0,h:sh,cr:sh*.3,tx:x,ty:y,ph:rand(0,6),cool:0,woke:false,jonas:n===jIdx,say:'',sayT:0}); break; } }
   }
-  if(L.field==='peaks') for(let n=0;n<6;n++){ for(let k=0;k<60;k++){ const x=rand(10,W-10), y=rand(H*.22,H*.85);
-      const o=G.jacks[G.jacks.length-1]; if(freeAt(x,y,4)&&Math.hypot(x-b.x,y-b.y)>12&&Math.hypot(x-o.x,y-o.y)>16){ G.peaks.push({x,y,r:2.2,ph:rand(0,6),f:rand(.7,1.4)}); break; } } }
+  G.darkA = panelAt(b.x).field==='dark'?1:0; G.echoA=0;
 }
+function panelAt(x){ const P=G.panels; for(let i=0;i<P.length;i++){ if(x<P[i].x0+P[i].w) return P[i]; } return P[P.length-1]; }
+function adsrBand(x,y){ const p=panelAt(x); if(p.field!=='adsr') return -1; const f=(y/G.H-ADSR_TOP)/ADSR_H; return f>=0&&f<4?f|0:-1; }
 function freeAt(x,y,r){
   for(const k of G.knobs) if(Math.hypot(x-k.x,y-k.y)<k.r+r+.5) return false;
   for(const j of G.jacks) if(Math.hypot(x-j.x,y-j.y)<j.r+r+.3) return false;
@@ -249,7 +309,7 @@ function mkItem(t,x,y,s){
 }
 
 // ----- growth / shedding -----
-function recompute(){ const b=G.ball; b.r=Math.sqrt(G.L.start*G.L.start + G.kM*G.growth*G.mass); }
+function recompute(){ const b=G.ball; b.r=Math.min((G.H-14)/2, Math.sqrt(G.L.start*G.L.start + G.kM*G.growth*G.mass)); }
 function attach(it){
   burst(it.x,it.y,it.col||'#ffb547',it.s);
   const b=G.ball, a=Math.atan2(it.y-b.y,it.x-b.x)-b.spin;
@@ -277,17 +337,25 @@ function shed(n, ax, ay, sp){
 
 // ----- per-frame -----
 function fieldAt(x,y,t){
-  if(G.L.field!=='tide') return [0,0];
+  if(panelAt(x).field!=='tide') return [0,0];
   const A=G.L.start*5.5;
   return [A*Math.sin(t*.55 + y*.07), A*.7*Math.cos(t*.41 + x*.09)];
 }
+function activeStep(){ return Math.floor(clock()/(STEP*2))%8; } // one step per 8th note
+function trailAt(t){ const T=G.trail; for(let i=T.length-1;i>=0;i--) if(T[i][0]<=t) return T[i]; return T[0]; }
+
 function update(dt){
   const b=G.ball, L=G.L, W=G.W, H=G.H; G.t+=dt;
+  const here=panelAt(b.x), band=adsrBand(b.x,b.y), zf=band>=0?ADSR_FX[band]:ADSR_FX[2];
   // input → acceleration
-  const acc=23*Math.pow(b.r+.5,.62);
-  b.vx+=IN.x*acc*dt; b.vy+=IN.y*acc*dt;
+  const acc=23*Math.pow(b.r+.5,.45);
+  b.vx+=IN.x*acc*zf.acc*dt; b.vy+=IN.y*acc*zf.acc*dt;
   const [fx,fy]=fieldAt(b.x,b.y,G.t); b.vx+=fx*dt*.9; b.vy+=fy*dt*.9;
-  const damp=Math.exp(-2.1*dt); b.vx*=damp; b.vy*=damp;
+  const damp=Math.exp(-2.1*zf.damp*dt); b.vx*=damp; b.vy*=damp;
+  // sequencer: the lit step shoves you toward the next one
+  const st=activeStep();
+  for(const pd of G.pads){ if(pd.i!==st) continue; const dx=b.x-pd.x, dy=b.y-pd.y; if(dx*dx+dy*dy<(pd.r+b.r*.4)**2){ const nx=G.pads.find(q=>q.p===pd.p&&q.i===(st+1)%8);
+      const ux=nx.x-pd.x, uy=nx.y-pd.y, m=Math.hypot(ux,uy); b.vx+=ux/m*acc*2.4*dt; b.vy+=uy/m*acc*2.4*dt; } }
   b.x+=b.vx*dt; b.y+=b.vy*dt;
   const sp=Math.hypot(b.vx,b.vy);
   b.spin += (b.vx>=0?1:-1)*sp/Math.max(b.r,.1)*dt*.8;
@@ -295,25 +363,36 @@ function update(dt){
   // walls
   if(b.x<b.r){b.x=b.r;b.vx=Math.abs(b.vx)*.45;} if(b.x>W-b.r){b.x=W-b.r;b.vx=-Math.abs(b.vx)*.45;}
   if(b.y<b.r+5){b.y=b.r+5;b.vy=Math.abs(b.vy)*.45;} if(b.y>H-b.r-5){b.y=H-b.r-5;b.vy=-Math.abs(b.vy)*.45;}
+  // darkness and echoes follow whichever panel you're in
+  G.darkA+=((here.field==='dark'?1:0)-G.darkA)*Math.min(1,dt*2.5);
+  G.echoA+=((here.field==='echo'?1:0)-G.echoA)*Math.min(1,dt*2.5);
+  G.trail.push([G.t,b.x,b.y]); while(G.trail.length>2&&G.trail[0][0]<G.t-1.2) G.trail.shift();
+  G.echoes.length=0; if(G.echoA>.05) for(const [lag,k] of [[.42,.66],[.84,.46]]){ const p=trailAt(G.t-lag); G.echoes.push({x:p[1],y:p[2],r:b.r*k,a:G.echoA}); }
   // knobs: walls until you're bigger than them
-  for(const k of G.knobs){ if(b.r>k.r*1.3) continue; const dx=b.x-k.x, dy=b.y-k.y, d=Math.hypot(dx,dy), m=k.r+b.r;
+  for(const k of G.knobs){ if(b.r>k.r*1.3) continue; const dx=b.x-k.x, dy=b.y-k.y; if(Math.abs(dx)>k.r+b.r||Math.abs(dy)>k.r+b.r) continue; const d=Math.hypot(dx,dy), m=k.r+b.r;
     if(d<m && d>0){ const nx=dx/d, ny=dy/d, vn=b.vx*nx+b.vy*ny; b.x=k.x+nx*m; b.y=k.y+ny*m;
       if(vn<0){ b.vx-=1.5*vn*nx; b.vy-=1.5*vn*ny; if(-vn>b.r*7) { shed(1,nx,ny,-vn*.6); sfxThud(.5); } } k.ang+= -vn*.02; } }
   // resonance peaks
-  for(const p of G.peaks){ if(b.r>G.L.goal*.8) break; const pr=p.r*(1+.35*Math.sin(G.t*3*p.f+p.ph)); const dx=b.x-p.x, dy=b.y-p.y, d=Math.hypot(dx,dy), m=pr+b.r;
+  if(b.r<=L.goal*.8) for(const p of G.peaks){ const pr=p.r*(1+.35*Math.sin(G.t*3*p.f+p.ph)); const dx=b.x-p.x, dy=b.y-p.y, d=Math.hypot(dx,dy), m=pr+b.r;
     if(d<m && d>0){ const nx=dx/d, ny=dy/d; b.x=p.x+nx*m; b.y=p.y+ny*m; const kick=b.r*9+12;
       b.vx=nx*kick; b.vy=ny*kick; if(rnd()<.65) shed(1,nx,ny,kick*.5); sfxPeak(); } }
   // items
-  const pickR=b.r*.5;
+  const pickR=b.r*.5, echoOn=G.echoA>.5;
   for(let i=G.items.length-1;i>=0;i--){ const it=G.items[i];
     if(it.cool>0) it.cool-=dt;
     if(it.t==='spark'){ const dx=it.x-b.x, dy=it.y-b.y, d=Math.hypot(dx,dy)||1, a=it.s*25;
       it.vx+=((rnd()-.5)*2*a + Math.cos(G.t*1.7+it.seed*20)*a)*dt; it.vy+=((rnd()-.5)*2*a + Math.sin(G.t*1.3+it.seed*20)*a)*dt;
       if(d<b.r*5 && it.s<=pickR){ const f=acc*.5/d; it.vx+=dx*f*dt; it.vy+=dy*f*dt; } }
-    if(it.vx||it.vy||L.field==='tide'){ const [ix,iy]=fieldAt(it.x,it.y,G.t); it.vx+=ix*dt*.7; it.vy+=iy*dt*.7;
-      const dd=Math.exp(-2.4*dt); it.vx*=dd; it.vy*=dd; it.x+=it.vx*dt; it.y+=it.vy*dt; it.rot+=it.vr*dt; it.vr*=dd;
+    if(G.pads.length){ for(const pd of G.pads){ if(pd.i!==st) continue; const dx=it.x-pd.x, dy=it.y-pd.y; if(dx*dx+dy*dy<pd.r*pd.r){ const nx=G.pads.find(q=>q.p===pd.p&&q.i===(st+1)%8);
+        it.vx+=(nx.x-pd.x)*3*dt; it.vy+=(nx.y-pd.y)*3*dt; it.vr+=rand(-3,3)*dt; } } }
+    const inTide=panelAt(it.x).field==='tide';
+    if(it.vx||it.vy||inTide){ const [ix,iy]=fieldAt(it.x,it.y,G.t); it.vx+=ix*dt*.7; it.vy+=iy*dt*.7;
+      const ib=adsrBand(it.x,it.y), dd=Math.exp(-2.4*(ib===3?.2:ib===1?2:1)*dt); it.vx*=dd; it.vy*=dd; it.x+=it.vx*dt; it.y+=it.vy*dt; it.rot+=it.vr*dt; it.vr*=dd;
       if(it.x<it.s){it.x=it.s;it.vx*=-.5} if(it.x>W-it.s){it.x=W-it.s;it.vx*=-.5} if(it.y<it.s+5){it.y=it.s+5;it.vy*=-.5} if(it.y>H-it.s-5){it.y=H-it.s-5;it.vy*=-.5}
-      if(Math.abs(it.vx)+Math.abs(it.vy)<.02 && L.field!=='tide' && it.t!=='spark'){it.vx=0;it.vy=0;} }
+      if(Math.abs(it.vx)+Math.abs(it.vy)<.02 && !inTide && it.t!=='spark'){it.vx=0;it.vy=0;} }
+    // echoes collect for you
+    if(echoOn && it.cool<=0){ let got=false; for(const e of G.echoes){ if(it.s>e.r*.5) continue; const ex=it.x-e.x, ey=it.y-e.y, lim=e.r+it.s*.7;
+        if(ex*ex+ey*ey<lim*lim){ got=true; break; } } if(got){ G.items.splice(i,1); attach(it); continue; } }
     const dx=it.x-b.x, dy=it.y-b.y; const lim=b.r+it.s*.7; if(Math.abs(dx)>lim||Math.abs(dy)>lim) continue;
     const d=Math.hypot(dx,dy); if(d>=lim) continue;
     if(it.s<=pickR && it.cool<=0){ G.items.splice(i,1); attach(it); continue; }
@@ -323,19 +402,20 @@ function update(dt){
     if(vn>0){ const j=1.6*vn/(mb+mi); it.vx=(it.vx||0)+nx*j*mb; it.vy=(it.vy||0)+ny*j*mb; it.vr=rand(-6,6); b.vx-=nx*j*mi; b.vy-=ny*j*mi;
       if(vn>b.r*6 && it.s>b.r*.8){ shed(1,-nx,-ny,vn*.5); sfxThud(.4); } }
   }
-  // pulses (gate triggers from a random jack)
+  // gate pulses: armed by a timer, fired on the next downbeat, from a jack near you
   G.pulseT-=dt;
-  if(!G.warn && G.pulseT<.9){ G.warn=pick(G.jacks.filter(j=>!j.out)); }
+  if(!G.warn && G.pulseT<.9){ const near=G.jacks.filter(j=>!j.out&&Math.abs(j.x-b.x)<140); G.warn=pick(near.length?near:G.jacks.filter(j=>!j.out)); }
   if(G.warn) G.warn.blink=1;
-  if(G.pulseT<=0){ const j=G.warn; G.warn=null; j.blink=0; G.pulseT=L.pulseEvery*rand(.6,1);
-    G.pulses.push({x:j.x,y:j.y,R:j.r,hit:false,v:Math.max(W,H)*.45}); sfxPulse(); }
+  const bar=Math.floor(clock()/BAR), newBar=bar!==G.lastBar; G.lastBar=bar;
+  if(G.pulseT<=0 && (newBar || G.pulseT<-BAR)){ const j=G.warn; G.warn=null; j.blink=0; G.pulseT=L.pulseEvery*rand(.6,1);
+    G.pulses.push({x:j.x,y:j.y,R:j.r,hit:false,v:Math.max(Math.min(W,180),H)*.45}); sfxPulse(); }
   for(let i=G.pulses.length-1;i>=0;i--){ const p=G.pulses[i]; const R0=p.R; p.R+=p.v*dt; const band=Math.max(2.2,b.r*.5);
     const db=Math.hypot(b.x-p.x,b.y-p.y);
     if(!p.hit && db+b.r>R0 && db-b.r<p.R+band){ p.hit=true; const nx=(b.x-p.x)/(db||1), ny=(b.y-p.y)/(db||1), kick=b.r*10+10;
-      b.vx+=nx*kick; b.vy+=ny*kick; const n=shed(2+Math.floor(G.li*.8),nx,ny,kick*.7);
+      b.vx+=nx*kick; b.vy+=ny*kick; const n=shed(Math.min(4,2+Math.floor(G.li*.5)),nx,ny,kick*.7);
       if(n && rnd()<.45 && !capBusy()) say('Otto',pick(OTTO.shed)); }
-    for(const it of G.items){ const d=Math.hypot(it.x-p.x,it.y-p.y); if(d>R0 && d<=p.R){ const k=(b.r*4+4)/(1+it.s); it.vx+=(it.x-p.x)/d*k; it.vy+=(it.y-p.y)/d*k; it.vr+=rand(-5,5);} }
-    if(p.R>Math.hypot(W,H)) G.pulses.splice(i,1); }
+    for(const it of G.items){ const dxp=it.x-p.x; if(dxp>p.R||dxp<-p.R) continue; const d=Math.hypot(dxp,it.y-p.y); if(d>R0 && d<=p.R){ const k=(b.r*4+4)/(1+it.s); it.vx+=dxp/d*k; it.vy+=(it.y-p.y)/d*k; it.vr+=rand(-5,5);} }
+    if(p.R>Math.max(Math.min(W,260),H)*1.2) G.pulses.splice(i,1); }
   // scrollers
   G.talkCool-=dt;
   for(const s of G.scrollers){ s.cool-=dt; s.sayT-=dt;
@@ -354,7 +434,7 @@ function update(dt){
   if(G.ready && !G.won){ const o=G.jacks.find(j=>j.out); if(Math.hypot(b.x-o.x,b.y-o.y)<b.r+o.r){ G.won=true; levelDone(); } }
 }
 function bumpScroller(s,nx,ny){
-  if(G.L.field==='wake' && !s.woke){
+  if(G.L.wake && !s.woke){
     s.woke=true; G.lookedUp++; sfxWake();
     const ph=mkItem('phone',s.x+nx*s.cr,s.y+ny*s.cr,s.h*.17); ph.vx=nx*s.h*1.4; ph.vy=ny*s.h*1.4; ph.vr=rand(-9,9); ph.cool=.5; G.items.push(ph);
     if(s.jonas){ G.jonas=true; s.say=JONAS.woke; s.sayT=4; say('Jonas',JONAS.woke,true,3.6); setTimeout(()=>say('Otto',JONAS.otto,false,6),3700); }
@@ -381,7 +461,7 @@ const brush=(()=>{ const c=document.createElement('canvas'); c.width=c.height=25
 
 const CAM={x:0,y:0,z:20};
 const SX=x=>(x-CAM.x)*CAM.z+VW/2, SY=y=>(y-CAM.y)*CAM.z+VH/2;
-function camUpdate(dt,snap){ const b=G.ball, zt=Math.min(VW,VH)*.052/b.r;
+function camUpdate(dt,snap){ const b=G.ball, zt=Math.max(Math.min(VW,VH)*.052/b.r, Math.min(VH/(G.H+24), VW*.28/b.r)); // big ball: let the panel fill the height
   CAM.z = snap?zt:CAM.z+(zt-CAM.z)*Math.min(1,dt*2.2);
   const hw=VW/2/CAM.z, hh=VH/2/CAM.z; let x=b.x, y=b.y;
   x = 2*hw>=G.W ? G.W/2 : clamp(x,hw,G.W-hw); y = 2*hh>=G.H+20 ? G.H/2 : clamp(y,hh-12,G.H-hh+6);
@@ -398,19 +478,22 @@ function render(){
   // rack rails above/below
   cx.fillStyle='#2a2d2f'; const ry1=SY(0), ry2=SY(H);
   cx.fillRect(0,ry1-9*z,VW,9*z); cx.fillRect(0,ry2,VW,9*z);
-  cx.fillStyle='#1b1d1e'; for(let k=-40;k<40;k++){ const x=SX(W/2+k*HP); cx.fillRect(x-.6*z,ry1-6*z,1.2*z,2.2*z); cx.fillRect(x-.6*z,ry2+3.8*z,1.2*z,2.2*z); }
-  // panel
-  cx.save(); cx.fillStyle=brush; cx.fillRect(SX(0),SY(0),W*z,H*z); cx.restore();
-  cx.strokeStyle='#000'; cx.lineWidth=Math.max(1,.3*z); cx.strokeRect(SX(0),SY(0),W*z,H*z);
-  // mounting holes + screws
-  for(const [hx,hy] of [[7.5,3],[W-7.5,3],[7.5,H-3],[W-7.5,H-3]]){ if(hx>W/2&&W<30) continue; screw(SX(hx),SY(hy),1.6*z); }
-  // header silkscreen
-  silk(L.id,W/2,10,7,'Major Mono Display',400); silk(L.name.toUpperCase(),W/2,16.5,2.4,'Barlow Condensed',600,'center','#9b998f');
-  silk(`BRANDT ELEKTRONIK · LINDENAU · ${L.hp}HP`,W/2,H-9,1.7,'Barlow Condensed',600,'center','#7c7a72');
-  // tide streaks
-  if(L.field==='tide'){ cx.strokeStyle='rgba(127,211,255,.14)'; cx.lineWidth=Math.max(1,.25*z); cx.beginPath();
-    for(let y=8;y<H-6;y+=7) for(let x=4;x<W;x+=7){ const [a,c]=fieldAt(x,y,t), m=Math.hypot(a,c)||1, l=2.4;
-      const ph=((t*.8+x*.13+y*.07)%1); cx.moveTo(SX(x+a/m*l*ph),SY(y+c/m*l*ph)); cx.lineTo(SX(x+a/m*l*(ph+.5)),SY(y+c/m*l*(ph+.5))); } cx.stroke(); }
+  cx.fillStyle='#1b1d1e'; const k0=Math.floor((CAM.x-VW/2/z)/HP)-1, k1=Math.ceil((CAM.x+VW/2/z)/HP)+1;
+  for(let k=k0;k<=k1;k++){ const x=SX(k*HP); cx.fillRect(x-.6*z,ry1-6*z,1.2*z,2.2*z); cx.fillRect(x-.6*z,ry2+3.8*z,1.2*z,2.2*z); }
+  // panels, side by side
+  for(const p of G.panels){ const px=SX(p.x0), pw=p.w*z; if(px>VW||px+pw<0) continue; const m=p.m, mx=p.x0+p.w/2;
+    cx.save(); cx.fillStyle=brush; cx.fillRect(px,SY(0),pw,H*z); cx.restore();
+    if(G.kickV>.01){ cx.fillStyle=`rgba(255,181,71,${.05*G.kickV})`; cx.fillRect(px,SY(0),pw,H*z); }
+    cx.strokeStyle='#000'; cx.lineWidth=Math.max(1,.3*z); cx.strokeRect(px,SY(0),pw,H*z);
+    for(const [hx,hy] of [[7.5,3],[p.w-7.5,3],[7.5,H-3],[p.w-7.5,H-3]]) screw(SX(p.x0+hx),SY(hy),1.6*z);
+    silk(p.id,mx,10,7,'Major Mono Display',400); silk(m.name.toUpperCase(),mx,16.5,2.4,'Barlow Condensed',600,'center','#9b998f');
+    silk(`BRANDT ELEKTRONIK · ${m.hp}HP`,mx,H-9,1.7,'Barlow Condensed',600,'center','#7c7a72');
+    if(p.field==='tide'){ cx.strokeStyle='rgba(127,211,255,.14)'; cx.lineWidth=Math.max(1,.25*z); cx.beginPath();
+      for(let y=8;y<H-6;y+=7) for(let x=p.x0+4;x<p.x0+p.w;x+=7){ const [a,c]=fieldAt(x,y,t), mm=Math.hypot(a,c)||1, l=2.4;
+        const ph=((t*.8+x*.13+y*.07)%1); cx.moveTo(SX(x+a/mm*l*ph),SY(y+c/mm*l*ph)); cx.lineTo(SX(x+a/mm*l*(ph+.5)),SY(y+c/mm*l*(ph+.5))); } cx.stroke(); }
+    if(p.field==='adsr') drawADSR(p);
+  }
+  drawPads();
   // knobs
   for(const k of G.knobs){ drawKnob(k); }
   // jacks
@@ -430,13 +513,13 @@ function render(){
     if(big && it.s<b.r*1.2 && s>6){ cx.strokeStyle='rgba(235,230,217,.18)'; cx.lineWidth=1; cx.beginPath(); cx.arc(x,y,s*1.15,0,7); cx.stroke(); } }
   // scrollers (sorted by y so they overlap properly)
   const ss=G.scrollers.slice().sort((a,c)=>a.y-c.y); for(const s of ss) drawScroller(s);
-  // ball
-  drawBall();
+  // echoes, then the ball
+  drawEchoes(); drawBall();
   // pulses
-  for(const p of G.pulses){ const a=Math.max(0,1-p.R/Math.max(W,H)); cx.strokeStyle=`rgba(255,181,71,${.55*a})`; cx.lineWidth=Math.max(2,b.r*.5*z);
+  for(const p of G.pulses){ const a=Math.max(0,1-p.R/(Math.max(Math.min(W,260),H)*1.2)); cx.strokeStyle=`rgba(255,181,71,${.55*a})`; cx.lineWidth=Math.max(2,b.r*.5*z);
     cx.beginPath(); cx.arc(SX(p.x),SY(p.y),p.R*z,0,7); cx.stroke(); }
   // darkness
-  if(L.field==='dark') drawFog();
+  if(G.darkA>.02) drawFog();
   drawFx();
   // guide arrow to OUT
   if(G.ready) edgeArrow(G.jacks.find(j=>j.out));
@@ -501,7 +584,7 @@ function drawBall(){ const b=G.ball, z=CAM.z, x=SX(b.x), y=SY(b.y), r=b.r*z;
   if(b.hurt>0){ cx.strokeStyle=`rgba(255,181,71,${b.hurt*2})`; cx.lineWidth=3; cx.beginPath(); cx.arc(x,y,r*1.15,0,7); cx.stroke(); } }
 
 function drawFog(){ fx.setTransform(DPR,0,0,DPR,0,0); fx.globalCompositeOperation='source-over'; fx.clearRect(0,0,VW,VH);
-  fx.fillStyle='rgba(4,5,6,.94)'; fx.fillRect(0,0,VW,VH); fx.globalCompositeOperation='destination-out';
+  fx.fillStyle=`rgba(4,5,6,${.94*G.darkA})`; fx.fillRect(0,0,VW,VH); fx.globalCompositeOperation='destination-out';
   const hole=(x,y,r,a)=>{ const g=fx.createRadialGradient(x,y,0,x,y,r); g.addColorStop(0,`rgba(0,0,0,${a})`); g.addColorStop(1,'rgba(0,0,0,0)'); fx.fillStyle=g; fx.beginPath(); fx.arc(x,y,r,0,7); fx.fill(); };
   const b=G.ball, z=CAM.z; hole(SX(b.x),SY(b.y),b.r*z*(6.5+.3*Math.sin(G.t*7)),1);
   for(const s of G.scrollers) hole(SX(s.x),SY(s.y-s.h*.6),s.h*z*.6,.8);
@@ -517,12 +600,40 @@ function edgeArrow(o){ const x=SX(o.x), y=SY(o.y), m=46; if(x>m&&x<VW-m&&y>m+40&
   cx.beginPath(); cx.moveTo(16,0); cx.lineTo(-8,-10); cx.lineTo(-3,0); cx.lineTo(-8,10); cx.fill(); cx.restore(); }
 
 function rr(x,y,w,h,r){ cx.beginPath(); cx.moveTo(x+r,y); cx.arcTo(x+w,y,x+w,y+h,r); cx.arcTo(x+w,y+h,x,y+h,r); cx.arcTo(x,y+h,x,y,r); cx.arcTo(x,y,x+w,y,r); cx.closePath(); }
+
+// sequencer pads: eight steps in a ring, lit on the 8th notes
+function drawPads(){ if(!G.pads.length) return; const z=CAM.z, st=activeStep();
+  for(const pd of G.pads){ const x=SX(pd.x), y=SY(pd.y), r=pd.r*z; if(x<-r*3||x>VW+r*3) continue; const on=pd.i===st, col=NEON[pd.i];
+    if(on){ cx.save(); cx.translate(x,y); glow(col,r*3,.9); cx.restore(); }
+    cx.fillStyle=on?col:'#24282b'; rr(x-r,y-r,r*2,r*2,r*.3); cx.fill(); cx.strokeStyle=on?'#fff':col; cx.globalAlpha=on?1:.5; cx.lineWidth=Math.max(1,.3*z); cx.stroke(); cx.globalAlpha=1;
+    const nx=G.pads.find(q=>q.p===pd.p&&q.i===(pd.i+1)%8), a=Math.atan2(nx.y-pd.y,nx.x-pd.x);
+    cx.save(); cx.translate(x,y); cx.rotate(a); cx.fillStyle=on?'#111':col; cx.globalAlpha=on?.8:.35;
+    cx.beginPath(); cx.moveTo(r*.55,0); cx.lineTo(-r*.25,-r*.35); cx.lineTo(-r*.25,r*.35); cx.fill(); cx.restore(); cx.globalAlpha=1;
+    silk(String(pd.i+1),pd.x,pd.y+pd.r+2.2,1.8,'Barlow Condensed',600,'center',on?'#fff':'#9b998f'); } }
+
+// envelope floor: four bands and the curve they make
+const ADSR_COL=['#ff3d8b','#ffb547','#33e1ff','#9b6bff'], ADSR_NAME=['ATTACK','DECAY','SUSTAIN','RELEASE'];
+function drawADSR(p){ const z=CAM.z, H=G.H, x=SX(p.x0+3), w=(p.w-6)*z;
+  for(let i=0;i<4;i++){ const y=SY(H*(ADSR_TOP+ADSR_H*i)), h=H*ADSR_H*z; cx.fillStyle=ADSR_COL[i]; cx.globalAlpha=.13; cx.fillRect(x,y,w,h); cx.globalAlpha=1;
+    cx.strokeStyle=ADSR_COL[i]; cx.globalAlpha=.4; cx.lineWidth=1; cx.strokeRect(x,y,w,h); cx.globalAlpha=1;
+    silk(ADSR_NAME[i],p.x0+p.w/2,H*(ADSR_TOP+ADSR_H*i+ADSR_H/2),2.6,'Barlow Condensed',700,'center',ADSR_COL[i]);
+    // motion hint inside each band
+    cx.fillStyle=ADSR_COL[i]; const sp=[3,.6,1.4,2.4][i], n=6; for(let k=0;k<n;k++){ const u=((G.t*sp*.12+k/n)%1); cx.globalAlpha=.35; cx.beginPath(); cx.arc(x+u*w,y+h*(.25+.5*((k*.37)%1)),Math.max(1,.5*z),0,7); cx.fill(); } cx.globalAlpha=1; }
+  // the envelope curve, silkscreened above the bands
+  const top=H*.37, bot=H*.41, X=f=>SX(p.x0+3+f*(p.w-6)); cx.strokeStyle='#ebe6d9'; cx.lineWidth=Math.max(1,.3*z); cx.beginPath();
+  cx.moveTo(X(0),SY(bot)); cx.lineTo(X(.15),SY(top)); cx.lineTo(X(.35),SY(top+(bot-top)*.4)); cx.lineTo(X(.7),SY(top+(bot-top)*.4)); cx.lineTo(X(1),SY(bot)); cx.stroke(); }
+
+// delay echoes: ghosts of you, a moment behind
+function drawEchoes(){ const z=CAM.z; for(const e of G.echoes){ const x=SX(e.x), y=SY(e.y), r=e.r*z;
+  cx.save(); cx.globalAlpha=.35*e.a; cx.translate(x,y); glow('#33e1ff',r*1.6,.5); cx.restore();
+  cx.save(); cx.globalAlpha=.4*e.a; cx.strokeStyle='#33e1ff'; cx.lineWidth=Math.max(1.5,r*.08); cx.setLineDash([r*.3,r*.2]);
+  cx.beginPath(); cx.arc(x,y,r,G.t*2,G.t*2+6.283); cx.stroke(); cx.setLineDash([]); cx.restore(); } }
 // ===== LIVE PARTS: colour, glow, motion =====
 const NEON=['#ff3d8b','#33e1ff','#b6ff3b','#ff8a1f','#9b6bff','#ffe14d','#ff4b3a','#3dff9a'];
 const ANOD=['#e0457b','#3fa9f5','#f5a623','#7ed321','#9b59ff','#e8e4da','#1fd1b9'];
 // which parts carry their own light, and which breathe
 const GLOWS={led:1,spark:1,wave:1,scope:1,seq:1,phone:1,heart:1,badge:1,plug:1,cable:1,knobcap:1,chip:1};
-const BREATHE={led:.08,spark:.18,wave:.06,heart:.14,badge:.07,knobcap:.04,plug:.05,cable:.05,scope:.03,seq:.03,phone:.03,ring:.06,glasses:.04,photo:.04,letter:.04,key:.05};
+const BREATHE={led:.08,spark:.18,wave:.06,heart:.14,badge:.07,knobcap:.04,plug:.05,cable:.05,scope:.03,seq:.03,phone:.03,ring:.06,glasses:.04,photo:.04,letter:.04,key:.05,ticket:.04,watch:.04,drawing:.04};
 
 // pre-rendered glow sprites, drawn additively (much cheaper than shadowBlur)
 const SPR={};
@@ -539,7 +650,7 @@ function colourFor(t){
 const WAVES=[p=>Math.sin(p*6.283), p=>1-4*Math.abs(((p+.25)%1+1)%1-.5), p=>2*(((p%1)+1)%1)-1, p=>(((p%1)+1)%1)<.5?1:-1];
 
 function drawItem(it,s){ const c=cx, T=G.t, ph=it.seed*6.283, rate=.7+it.seed*1.6, col=it.col||'#ffb547';
-  const br=BREATHE[it.t]; if(br){ const k=1+br*Math.sin(T*rate*3+ph); c.scale(k,k); }
+  const br=BREATHE[it.t]; let k=1+.12*G.kickV; if(br) k*=1+br*Math.sin(T*rate*3+ph); c.scale(k,k); // everything jumps a little on the kick
   switch(it.t){
   case 'dust': c.fillStyle='#86827a'; c.beginPath(); c.arc(0,0,s*.7,0,7); c.arc(s*.4,s*.2,s*.5,0,7); c.arc(-s*.3,s*.35,s*.45,0,7); c.fill();
     if(Math.sin(T*rate*2.3+ph*3)>.82){ glow(col,s*1.1,.9); c.fillStyle='#fff'; c.fillRect(-s*.1,-s*.1,s*.2,s*.2); } break;
@@ -593,6 +704,15 @@ function drawItem(it,s){ const c=cx, T=G.t, ph=it.seed*6.283, rate=.7+it.seed*1.
   case 'cable': { const w=Math.sin(T*rate*2.4+ph); c.strokeStyle=col; c.lineWidth=Math.max(1.2,s*.24); c.lineCap='round'; c.beginPath(); c.moveTo(-s*.8,-s*.4);
     c.bezierCurveTo(-s*.2,s*.9*w,s*.3,-s*.9*w,s*.8,s*.4); c.stroke(); c.fillStyle='#222'; c.fillRect(-s*.95,-s*.55,s*.3,s*.3); c.fillRect(s*.65,s*.25,s*.3,s*.3);
     c.save(); c.translate(-s*.8,-s*.4); glow(col,s*.45,.7); c.restore(); c.save(); c.translate(s*.8,s*.4); glow(col,s*.45,.7); c.restore(); break; }
+  case 'ticket': glow('#ffb547',s*1.6,.4); c.fillStyle='#f3d98a'; c.fillRect(-s,-s*.5,s*2,s); c.fillStyle='#d94a3a'; c.fillRect(-s,-s*.5,s*.5,s);
+    c.fillStyle='#14161a'; for(let i=0;i<4;i++) c.fillRect(-s*.35+i*s*.32,-s*.18,s*.22,s*.08); c.fillRect(-s*.35,s*.05,s*1.1,s*.08);
+    c.fillStyle='#14161a'; for(let i=0;i<5;i++){ c.beginPath(); c.arc(-s*.5,-s*.4+i*s*.2,s*.05,0,7); c.fill(); } break;
+  case 'watch': { glow('#ffb547',s*1.6,.4); c.fillStyle='#d9a93e'; c.beginPath(); c.arc(0,s*.1,s*.85,0,7); c.fill(); c.fillRect(-s*.15,-s*1,s*.3,s*.25);
+    c.fillStyle='#f6f0de'; c.beginPath(); c.arc(0,s*.1,s*.68,0,7); c.fill(); c.strokeStyle='#14161a'; c.lineWidth=Math.max(1,s*.08);
+    const a1=T*.6+ph, a2=T*.05+ph; c.beginPath(); c.moveTo(0,s*.1); c.lineTo(Math.sin(a1)*s*.55,s*.1-Math.cos(a1)*s*.55); c.moveTo(0,s*.1); c.lineTo(Math.sin(a2)*s*.35,s*.1-Math.cos(a2)*s*.35); c.stroke(); break; }
+  case 'drawing': glow('#ffb547',s*1.6,.4); c.fillStyle='#fbf7ec'; c.fillRect(-s,-s*.75,s*2,s*1.5); c.lineWidth=Math.max(1,s*.1); c.lineCap='round';
+    c.strokeStyle='#3a7bd9'; c.strokeRect(-s*.6,-s*.45,s*1.2,s*.9); c.fillStyle='#d94a3a'; c.beginPath(); c.arc(-s*.25,-s*.15,s*.1,0,7); c.arc(s*.25,-s*.15,s*.1,0,7); c.fill();
+    c.strokeStyle='#e8a317'; c.beginPath(); c.arc(0,0,s*.3,.4,2.74); c.stroke(); c.strokeStyle='#2fbf71'; c.beginPath(); c.moveTo(-s*.9,s*.6); c.lineTo(s*.9,s*.6); c.stroke(); break;
   case 'ring': glow('#ffb547',s*1.6,.5); c.strokeStyle='#ffcf5a'; c.lineWidth=Math.max(1.5,s*.28); c.beginPath(); c.arc(0,0,s*.75,0,7); c.stroke(); break;
   case 'glasses': glow('#ffb547',s*1.6,.4); c.strokeStyle='#e6b84a'; c.lineWidth=Math.max(1,s*.12); c.beginPath(); c.arc(-s*.48,0,s*.4,0,7); c.moveTo(s*.88,0); c.arc(s*.48,0,s*.4,0,7); c.moveTo(-s*.08,0); c.lineTo(s*.08,0); c.stroke(); c.fillStyle='rgba(200,230,255,.25)'; c.beginPath(); c.arc(-s*.48,0,s*.38,0,7); c.arc(s*.48,0,s*.38,0,7); c.fill(); break;
   case 'photo': glow('#ffb547',s*1.6,.4); c.fillStyle='#efe8d8'; c.fillRect(-s*.8,-s,s*1.6,s*2); c.fillStyle='#8a6a48'; c.fillRect(-s*.66,-s*.86,s*1.32,s*1.4); c.fillStyle='#3a2c20'; c.beginPath(); c.arc(0,-s*.2,s*.32,0,7); c.fill(); c.fillRect(-s*.4,s*.12,s*.8,s*.42); break;
@@ -613,7 +733,7 @@ function drawFx(){ const z=CAM.z; cx.save(); cx.globalCompositeOperation='lighte
     else { cx.globalAlpha=1; const r=Math.max(2,p.sz*z*(.6+k)); cx.save(); cx.translate(x,y); glow(p.col,r*2.2,k); cx.restore(); } }
   cx.restore(); cx.globalAlpha=1; }
 // ===== AUDIO =====
-let AC=null, OUTG=null, SEND=null, muted=false, lastPick=0; G.done=0; G.nodes=[];
+let AC=null, OUTG=null, SEND=null, DLYIN=null, muted=false, lastPick=0; G.done=0; G.nodes=[];
 function audioInit(){
   if(AC){ if(AC.state==='suspended') AC.resume(); return; }
   try{ AC=new (window.AudioContext||window.webkitAudioContext)(); }catch(e){ return; }
@@ -626,6 +746,10 @@ function audioInit(){
   const nb=AC.createBuffer(1,AC.sampleRate*2,AC.sampleRate), nd=nb.getChannelData(0); for(let i=0;i<nd.length;i++) nd[i]=Math.random()*2-1;
   G.noise=nb; const ns=AC.createBufferSource(); ns.buffer=nb; ns.loop=true; const bp=AC.createBiquadFilter(); bp.type='bandpass'; bp.frequency.value=3200; bp.Q.value=.6;
   const ng=AC.createGain(); ng.gain.value=.012; ns.connect(bp).connect(ng).connect(OUTG); ns.start();
+  // dotted-8th delay for the lead, once DLY is patched
+  DLYIN=AC.createGain(); const dl=AC.createDelay(2), fb=AC.createGain(), wet=AC.createGain(); dl.delayTime.value=STEP*3; fb.gain.value=.38; wet.gain.value=.5;
+  DLYIN.connect(dl); dl.connect(fb).connect(dl); dl.connect(wet); wet.connect(OUTG); wet.connect(SEND);
+  transportStart();
 }
 const hz=semi=>110*Math.pow(2,semi/12);
 const scaleNote=(i)=>SCALE[((i%5)+5)%5]+12*Math.floor(i/5);
@@ -647,26 +771,57 @@ function sfxWake(){ tone('sine',hz(24),.08,1.4,.8); setTimeout(()=>tone('sine',h
 function sfxReady(){ [0,3,7,12].forEach((s,i)=>setTimeout(()=>tone('triangle',hz(s+12),.08,.5,.6),i*90)); }
 function sfxPatch(){ noiseHit(3000,2,.25,.04); tone('sine',hz(0),.12,1.8,.9); }
 
-// the rack's voice, rebuilt one module at a time
+// ===== TRANSPORT: an 808 heartbeat that builds, module by module =====
+G.T0=null; G.kickTimes=[]; G.finale=false;
+function clock(){ return (AC&&G.T0!=null)? Math.max(0,AC.currentTime-G.T0) : performance.now()/1000; }
+// kick patterns per level (16ths): starts as Otto's lub-dub, ends four on the floor
+const KICKS=[ {g:.30,h:{0:1,3:.55}}, {g:.36,h:{0:1,3:.55}}, {g:.42,h:{0:1,3:.5,8:.8}}, {g:.48,h:{0:1,4:.85,8:1,12:.85}},
+  {g:.52,h:{0:1,4:.85,8:1,12:.85,14:.45}}, {g:.56,h:{0:1,4:.85,8:1,10:.55,12:.85}}, {g:.6,h:{0:1,3:.55,4:.85,8:1,11:.55,12:.85}},
+  {g:.64,h:{0:1,4:.85,6:.4,8:1,12:.85,14:.45}}, {g:.64,h:{0:1,4:.9,8:1,12:.9}} ];
+const CH=[[0,3,7],[-4,0,3],[3,7,10],[-2,2,5]], ARP=[0,1,2,1,0,2,1,2], PAT=[0,2,4,3,5,4,2,1];
+function transportStart(){ G.T0=AC.currentTime+.15; G.nextT=G.T0; G.step=0; G.sched=setInterval(()=>{ while(G.nextT<AC.currentTime+.2){ playStep(G.step,G.nextT); G.nextT+=STEP; G.step++; } },30); }
+function playStep(n,t){ const s=n%16, bar=Math.floor(n/16), stage=G.finale?8:Math.min(G.li,7), K=KICKS[stage], v=K.h[s];
+  const big=G.L&&G.L.rack||G.finale, chord=big?CH[Math.floor(bar/2)%4]:CH[0];
+  if(v) kick(t,v*K.g, stage<2?1.1:.75);
+  if(G.done>=6 && s%2===0) hat(t, s%4===2?1:.4);
+  if(G.done>=5 && v>=.8) bass(t, chord[0]-12);
+  if(G.done>=3 && s%2===0){ const k=(n/2|0)%8, semi = big ? chord[ARP[k]]+12+(k===3||k===7?12:0) : scaleNote(PAT[k]+5); lead(t,semi); }
+  if(big && G.done>=3 && s===0 && bar%2===0) pad(t,chord);
+}
+function kick(t,v,dec){ const o=AC.createOscillator(), g=AC.createGain(); o.type='sine';
+  o.frequency.setValueAtTime(150,t); o.frequency.exponentialRampToValueAtTime(52,t+.07); o.frequency.exponentialRampToValueAtTime(41,t+dec*.8);
+  g.gain.setValueAtTime(0,t); g.gain.linearRampToValueAtTime(v,t+.004); g.gain.exponentialRampToValueAtTime(.0008,t+dec); o.connect(g).connect(OUTG); o.start(t); o.stop(t+dec+.05);
+  const nz=AC.createBufferSource(), f=AC.createBiquadFilter(), ng=AC.createGain(); nz.buffer=G.noise; f.type='highpass'; f.frequency.value=2500;
+  ng.gain.setValueAtTime(v*.22,t); ng.gain.exponentialRampToValueAtTime(.0005,t+.015); nz.connect(f).connect(ng).connect(OUTG); nz.start(t,Math.random()); nz.stop(t+.03);
+  G.kickTimes.push(t); if(G.kickTimes.length>8) G.kickTimes.shift(); }
+function hat(t,v){ const nz=AC.createBufferSource(), f=AC.createBiquadFilter(), g=AC.createGain(); nz.buffer=G.noise; f.type='highpass'; f.frequency.value=7500;
+  g.gain.setValueAtTime(.05*v,t); g.gain.exponentialRampToValueAtTime(.0004,t+.04); nz.connect(f).connect(g).connect(OUTG); nz.start(t,Math.random()); nz.stop(t+.06); }
+function bass(t,semi){ const o=AC.createOscillator(), f=AC.createBiquadFilter(), g=AC.createGain(); o.type='sawtooth'; o.frequency.value=hz(semi);
+  f.type='lowpass'; f.frequency.setValueAtTime(700,t); f.frequency.exponentialRampToValueAtTime(160,t+.25); f.Q.value=5; env(g,.004,.11,.3,t); o.connect(f).connect(g).connect(OUTG); o.start(t); o.stop(t+.4); }
+function lead(t,semi){ const o=AC.createOscillator(), f=AC.createBiquadFilter(), g=AC.createGain(); o.type=G.done>=6?'sawtooth':'triangle'; o.frequency.value=hz(semi);
+  f.type='lowpass'; f.Q.value=G.done>=4?6:1; f.frequency.value=G.done>=4? 900+1500*(.5+.5*Math.sin(t*.35)) : 1100;
+  const dec=G.done>=5?.22:.5; env(g,.005,G.done>=6?.04:.055,dec,t); o.connect(f).connect(g); g.connect(OUTG); g.connect(SEND); if(G.done>=7) g.connect(DLYIN);
+  o.start(t); o.stop(t+dec+.1); }
+function pad(t,chord){ const f=AC.createBiquadFilter(), g=AC.createGain(), len=BAR*2; f.type='lowpass'; f.frequency.value=1200;
+  g.gain.setValueAtTime(0,t); g.gain.linearRampToValueAtTime(.022,t+1.2); g.gain.setValueAtTime(.022,t+len-1); g.gain.linearRampToValueAtTime(0,t+len+.4); f.connect(g); g.connect(OUTG); g.connect(SEND);
+  for(const c of chord) for(const d of [-7,7]){ const o=AC.createOscillator(); o.type='sawtooth'; o.frequency.value=hz(c); o.detune.value=d; o.connect(f); o.start(t); o.stop(t+len+.5); } }
+
+// the rack's sustained voice: drone, drift, sweep, and the bells at the very end
 function music(){
   if(!AC) return; const n=G.done, t=AC.currentTime, keep=x=>(G.nodes.push(x),x);
   if(n>=1 && !G.vco){ const lp=keep(AC.createBiquadFilter()); lp.type='lowpass'; lp.frequency.value=900; lp.Q.value=1;
-    const g=keep(AC.createGain()); g.gain.setValueAtTime(0,t); g.gain.linearRampToValueAtTime(.045,t+3);
+    const g=keep(AC.createGain()); g.gain.setValueAtTime(0,t); g.gain.linearRampToValueAtTime(.04,t+3);
     const o1=keep(AC.createOscillator()), o2=keep(AC.createOscillator()); o1.type=o2.type='sawtooth'; o1.frequency.value=55; o2.frequency.value=55.25;
     o1.connect(lp); o2.connect(lp); lp.connect(g).connect(OUTG); const s=keep(AC.createGain()); s.gain.value=.4; g.connect(s).connect(SEND); o1.start(); o2.start(); G.vco={o1,o2,lp,g}; }
   if(n>=2 && !G.lfo){ const l=keep(AC.createOscillator()); l.frequency.value=.17; const d=keep(AC.createGain()); d.gain.value=14; const d2=keep(AC.createGain()); d2.gain.value=260;
     l.connect(d); d.connect(G.vco.o1.detune); d.connect(G.vco.o2.detune); l.connect(d2).connect(G.vco.lp.frequency); l.start(); G.lfo=l; }
-  if(n>=3 && !G.vcf){ G.vco.lp.Q.setTargetAtTime(7,t,1.5); const l=keep(AC.createOscillator()); l.frequency.value=.045; const d=keep(AC.createGain()); d.gain.value=700; l.connect(d).connect(G.vco.lp.frequency);
+  if(n>=4 && !G.vcf){ G.vco.lp.Q.setTargetAtTime(7,t,1.5); const l=keep(AC.createOscillator()); l.frequency.value=.045; const d=keep(AC.createGain()); d.gain.value=700; l.connect(d).connect(G.vco.lp.frequency);
     G.vco.lp.frequency.setTargetAtTime(1100,t,1); l.start(); G.vcf=l; }
-  if(n>=4 && !G.seq){ let step=0, next=AC.currentTime+.1; const pat=[0,2,4,3,5,4,2,1, 0,2,4,6,5,3,2,-1];
-    G.seq=setInterval(()=>{ if(!AC) return; while(next<AC.currentTime+.25){ const p=pat[step%pat.length]; if(p>=0){ const o=AC.createOscillator(), g=AC.createGain(), f=AC.createBiquadFilter();
-        o.type='triangle'; o.frequency.value=hz(scaleNote(p+5)); f.type='lowpass'; f.frequency.value=2400; env(g,.006,.07,.55,next); o.connect(f).connect(g).connect(OUTG); g.connect(SEND); o.start(next); o.stop(next+.7); }
-      next+=.42; step++; } },60); }
-  if(n>=5 && !G.bell){ SEND.gain.setTargetAtTime(.75,t,2); [hz(24),hz(27),hz(31),hz(36)].forEach((f,i)=>{ const o=keep(AC.createOscillator()), g=keep(AC.createGain()); o.type='sine'; o.frequency.value=f;
-      g.gain.setValueAtTime(0,t); g.gain.linearRampToValueAtTime(.018,t+4+i); o.connect(g).connect(SEND); o.start(); }); G.bell=true; }
+  if(G.finale && !G.bell){ SEND.gain.setTargetAtTime(.75,t,2); [hz(24),hz(27),hz(31),hz(36)].forEach((f,i)=>{ const o=keep(AC.createOscillator()), g=keep(AC.createGain()); o.type='sine'; o.frequency.value=f;
+      g.gain.setValueAtTime(0,t); g.gain.linearRampToValueAtTime(.016,t+4+i); o.connect(g).connect(SEND); o.start(); }); G.bell=true; }
 }
-function musicReset(){ for(const x of G.nodes){ try{ x.stop&&x.stop(); }catch(e){} try{ x.disconnect(); }catch(e){} } G.nodes=[]; clearInterval(G.seq);
-  G.vco=G.lfo=G.vcf=G.seq=G.bell=null; if(SEND) SEND.gain.value=.35; }
+function musicReset(){ for(const x of G.nodes){ try{ x.stop&&x.stop(); }catch(e){} try{ x.disconnect(); }catch(e){} } G.nodes=[];
+  G.vco=G.lfo=G.vcf=G.bell=null; G.finale=false; if(SEND) SEND.gain.value=.35; }
 
 // ===== INPUT =====
 const IN={x:0,y:0,touch:false,ox:0,oy:0,id:null}; const KEYS=new Set();
@@ -700,60 +855,57 @@ function dial(){ return `<div class="dial"><div class="dial-top"><label for="gro
 function titleCard(){
   card(`<div class="kicker"><span>Brandt Elektronik</span><span>Lindenau · 1979</span></div>
     <h1 class="ctitle">Decay Envelope</h1>
-    <div class="cbody"><p>An old man rolls through the five modules of a dead synthesizer, picking up whatever is loose, until he's big enough to patch it back into a voice.</p>
+    <div class="cbody"><p>An old man rolls through the eight modules of a dead synthesizer, picking up whatever is loose, until he's big enough to patch it back into a voice.</p>
     <p>Outside the rack, nobody looks up from their phones. Inside it, they don't either.</p></div>
-    <dl class="specs"><dt>Move</dt><dd>Drag anywhere · WASD / arrows</dd><dt>Grow</dt><dd>Roll over anything half your size</dd><dt>Avoid</dt><dd>Gate pulses shake things loose</dd><dt>Win</dt><dd>Reach target Ø, roll into OUT</dd></dl>${dial()}`,
+    <dl class="specs"><dt>Move</dt><dd>Drag anywhere · WASD / arrows</dd><dt>Grow</dt><dd>Roll over anything half your size</dd><dt>Avoid</dt><dd>Gate pulses, on the downbeat</dd><dt>Win</dt><dd>Reach target Ø, roll into OUT</dd></dl>${dial()}`,
     'Patch in', ()=>introCard(0), '<span class="led"></span>Sound on');
 }
 function introCard(i){
-  buildLevel(i); const L=LEVELS[i];
-  card(`<div class="kicker"><span>Module ${i+1} / 5</span><span>${L.hp} HP · ${(L.hp*HP).toFixed(1)} mm</span></div>
-    <h2 class="ctitle">${L.id}</h2><div class="kicker" style="margin-top:-6px"><span>${L.name}</span></div>
+  buildLevel(i); const L=LEVELS[i], hp=L.mods.reduce((a,m)=>a+MODS[m].hp,0);
+  card(`<div class="kicker"><span>${L.rack?'Final level':`Module ${i+1} / ${LAST}`}</span><span>${hp} HP · ${(hp*HP).toFixed(1)} mm</span></div>
+    <h2 class="ctitle">${lvlId(L)}</h2><div class="kicker" style="margin-top:-6px"><span>${lvlName(L)}</span></div>
     <div class="cbody">${L.intro.map(p=>`<p>${p}</p>`).join('')}</div>
     <dl class="specs"><dt>Start</dt><dd>Ø ${(L.start*2).toFixed(1)} mm</dd><dt>Target</dt><dd>Ø ${(L.goal*2).toFixed(1)} mm</dd><dt>Keepsake</dt><dd>${L.memento.name}, somewhere</dd></dl>${dial()}`,
     'Roll', play);
   camUpdate(0,true);
 }
-const HEARD=["A sawtooth. Two of them, a quarter-hertz apart, beating against each other like an old couple sharing a bed.",
-  "Now the pitch drifts. Slow, tidal. It sounds like breathing.",
-  "The filter opens and closes on its own. The tone has a mouth now.",
-  "The amplifier opens in rhythm. Notes. Actual notes, in a row, one after another.",
-  ""];
+const lvlId=L=>L.rack?'RACK':L.mods[0], lvlName=L=>L.rack?'The whole rack':MODS[L.mods[0]].name;
 function levelDone(){
-  const i=G.li, L=G.L; G.done=i+1; music();
+  const i=G.li, L=G.L; G.done=i+1; if(i===LAST) G.finale=true; music();
   const kept = G.got.includes(L.memento.name);
-  if(i===4) return setTimeout(endCard,600);
+  if(i===LAST) return setTimeout(endCard,600);
   setTimeout(()=>card(`<div class="kicker"><span>Patched</span><span>Ø ${(G.ball.r*2).toFixed(1)} mm</span></div>
-    <h2 class="ctitle small">${L.id} → OUT</h2>
-    <div class="cbody"><p>${HEARD[i]}</p><p>${kept?`He carries ${L.memento.name} with him.`:`He didn't find ${L.memento.name}. It's still in there, somewhere under the ${L.id}.`}</p></div>`,
-    'Next module', ()=>introCard(i+1), `${G.done} of 5 voices`),500);
+    <h2 class="ctitle small">${lvlId(L)} → OUT</h2>
+    <div class="cbody"><p>${HEARD[i]}</p><p>${kept?`He carries ${L.memento.name} with him.`:`He didn't find ${L.memento.name}. It's still in there, somewhere under the ${lvlId(L)}.`}</p></div>`,
+    'Next module', ()=>introCard(i+1), `${G.done} of ${LEVELS.length} voices`),500);
 }
 function endCard(){
-  const n=G.lookedUp, tot=LEVELS[4].scrollers, k=G.keepsakes;
-  const p2 = n>=8 ? `${n} of them stayed to listen. They didn't film it. One asked what the piece was called, and Otto realised it had never had a name.`
-    : n>=3 ? `${n} of them looked up. The rest posted that they had heard something. Otto decided that counted, a little.`
+  const n=G.lookedUp, tot=LEVELS[LAST].scrollers, k=G.keepsakes, K=LEVELS.length;
+  const p2 = n>=10 ? `${n} of them stayed to listen. They didn't film it. One asked what the piece was called, and Otto realised it had never had a name.`
+    : n>=4 ? `${n} of them looked up. The rest posted that they had heard something. Otto decided that counted, a little.`
     : `Hardly anyone looked up. It got forty-one thousand views. Otto doesn't know what that means, and he suspects nobody does.`;
   const p3 = G.jonas ? `Jonas sat down on the floor of the output stage, the way he used to at six, and didn't take out his phone.`
     : `His son was somewhere in that crowd. Otto didn't find him this time. The patch stays plugged in. He can try again tomorrow.`;
-  const p4 = k===5 ? `He kept all five keepsakes. He rolled them into the same ball as the screws and the dust, which is where they belonged.`
-    : `He kept ${k} of five keepsakes${k?`: ${G.got.join(', ')}`:''}.`;
+  const p4 = k===K ? `He kept all eight keepsakes. He rolled them into the same ball as the screws and the dust, which is where they belonged.`
+    : `He kept ${k} of eight keepsakes${k?`: ${G.got.join(', ')}`:''}.`;
   card(`<div class="kicker"><span>Main out</span><span>Release: long</span></div>
     <h2 class="ctitle">Release</h2>
-    <div class="cbody"><p>The rack plays. Sawtooth, tide, resonance, a small melody gated on and off, all of it washing out through the main outs into a room nobody has visited in years.</p>
+    <div class="cbody"><p>The rack plays. A kick like a slow heart, sawtooth, tide, eight steps going round, a filter opening its mouth, hats, echoes, and chords on top, all of it washing out through the main outs into a room nobody has visited in years.</p>
     <p>${p2}</p><p>${p3}</p><p>${p4}</p></div>
-    <dl class="specs"><dt>Looked up</dt><dd>${n} / ${tot}</dd><dt>Keepsakes</dt><dd>${k} / 5</dd><dt>Final Ø</dt><dd>${(G.ball.r*2).toFixed(1)} mm</dd></dl>`,
-    'Play again', ()=>{ musicReset(); Object.assign(G,{keepsakes:0,lookedUp:0,jonas:false,got:[],done:0}); introCard(0); }, 'The patch keeps playing');
+    <dl class="specs"><dt>Looked up</dt><dd>${n} / ${tot}</dd><dt>Keepsakes</dt><dd>${k} / ${K}</dd><dt>Final Ø</dt><dd>${(G.ball.r*2).toFixed(1)} mm</dd></dl>`,
+    'Play again', ()=>{ musicReset(); Object.assign(G,{keepsakes:0,lookedUp:0,jonas:false,got:[],done:0,finale:false}); introCard(0); }, 'The patch keeps playing');
 }
 
 // ===== HUD + LOOP =====
 const $=id=>document.getElementById(id); const H_MOD=$('mod'), H_TXT=$('meterTxt'), H_FILL=$('fill'), H_TK=$('tk'), H_TU=$('tu');
 $('mute').onclick=()=>{ audioInit(); muted=!muted; if(OUTG) OUTG.gain.setTargetAtTime(muted?0:.9,AC.currentTime,.05); $('mute').textContent=muted?'Muted':'Sound'; };
 function hud(){ const b=G.ball, L=G.L, p=clamp((b.r-L.start)/(L.goal-L.start),0,1);
-  H_MOD.innerHTML=`<b>${L.id}</b> · ${L.hp}HP`;
+  const pp=panelAt(b.x); H_MOD.innerHTML= L.rack ? `<b>RACK</b> · ${pp.id}` : `<b>${pp.id}</b> · ${pp.m.hp}HP`;
   H_TXT.innerHTML = G.ready ? `<b>Ø ${(b.r*2).toFixed(1)} mm</b> · roll into OUT` : `Ø <b>${(b.r*2).toFixed(1)}</b> mm / ${(L.goal*2).toFixed(1)} mm`;
   H_FILL.style.width=(p*100).toFixed(1)+'%'; H_FILL.classList.toggle('ready',G.ready); H_TK.textContent=G.keepsakes; H_TU.textContent=G.lookedUp; }
 let last=performance.now();
 function frame(now){ const dt=Math.min(.05,(now-last)/1000); last=now;
+  if(AC&&G.T0!=null){ const nw=AC.currentTime; let lk=-1; for(const k of G.kickTimes) if(k<=nw&&k>lk) lk=k; G.kickV=lk>0?Math.exp(-(nw-lk)*7):0; }
   if(G.mode==='play'){ update(dt); hud(); camUpdate(dt); } else if(G.L){ G.t+=dt*.3; }
   if(capT>0){ capT-=dt; if(capT<=0) CAP.classList.remove('on'); }
   if(G.L) render(); requestAnimationFrame(frame); }
