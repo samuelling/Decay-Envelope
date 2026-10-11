@@ -12,6 +12,7 @@ Otto Brandt, 84, repaired synthesizers in Lindenau for fifty-one years. Nobody h
 - **Grow:** roll over anything up to half your diameter. Bigger things get shoved.
 - **Chaos:** every few seconds a gate pulse fires from a blinking jack and knocks pieces off you. Knobs are walls until you outgrow them.
 - **Win a module:** reach the target diameter, then roll into the OUT jack.
+- **Difficulty:** the growth-rate slider on the title and module cards scales how much each pickup grows you (0.6× to 2.5×, default 1.5×). It's remembered between sessions.
 
 ## The five modules
 

@@ -74,6 +74,17 @@ html,body{height:100%;margin:0;background:var(--panel);color:var(--silk);overflo
 .jack i{width:30px;height:30px;border-radius:50%;background:radial-gradient(circle,#050505 0 34%,#c9c9c4 36% 52%,#6d6f70 54% 66%,#2a2c2d 68%);box-shadow:0 0 0 1px #000;position:relative;transition:box-shadow .2s}
 .jack:hover i{box-shadow:0 0 0 1px #000,0 0 14px var(--amber)}
 .led{display:inline-block;width:7px;height:7px;border-radius:50%;background:var(--amber);box-shadow:0 0 8px var(--amber);margin-right:6px;vertical-align:1px}
+
+.dial{display:grid;gap:6px;border-top:1px solid #2c3033;padding-top:12px}
+.dial-top{display:flex;justify-content:space-between;align-items:baseline;font-family:var(--f-label);text-transform:uppercase;letter-spacing:.12em;font-size:13px;font-weight:600;color:var(--silk-dim)}
+.dial-top output{color:var(--amber);font-variant-numeric:tabular-nums;font-size:15px}
+.dial-ends{display:flex;justify-content:space-between;font-family:var(--f-label);text-transform:uppercase;letter-spacing:.1em;font-size:11px;color:var(--silk-dim)}
+#growth{-webkit-appearance:none;appearance:none;width:100%;height:28px;background:transparent;margin:0;cursor:pointer}
+#growth::-webkit-slider-runnable-track{height:6px;background:#0b0c0d;border:1px solid #000;border-radius:3px;box-shadow:0 0 0 1px #2c3033}
+#growth::-moz-range-track{height:6px;background:#0b0c0d;border:1px solid #000;border-radius:3px}
+#growth::-webkit-slider-thumb{-webkit-appearance:none;width:16px;height:26px;margin-top:-11px;border-radius:2px;background:linear-gradient(#d9d6cf,#8f8d88);border:1px solid #000;box-shadow:inset 0 -2px 0 #6d6b66,0 2px 4px rgba(0,0,0,.5)}
+#growth::-moz-range-thumb{width:16px;height:26px;border-radius:2px;background:linear-gradient(#d9d6cf,#8f8d88);border:1px solid #000}
+#growth:focus-visible{outline:2px solid var(--amber);outline-offset:4px}
 @media (prefers-reduced-motion:reduce){#caption,#fill{transition:none}}
 </style>
 </head>
@@ -181,7 +192,7 @@ const JONAS = {woke:"Papa? ...you shrank.", otto:"No, Jonas. You grew. I just wa
 const SCALE = [0,3,5,7,10]; // minor pentatonic, A
 // ===== ENGINE: state, level build, physics =====
 const K_MASS = 0.9;
-const G = { li:0, mode:'title', t:0, keepsakes:0, lookedUp:0, jonas:false, got:[] };
+const G = { li:0, mode:'title', t:0, keepsakes:0, lookedUp:0, jonas:false, got:[], growth:1.5 };
 let rnd = Math.random;
 const rand = (a,b)=>a+(b-a)*rnd();
 const pick = a=>a[(rnd()*a.length)|0];
@@ -193,14 +204,14 @@ function buildLevel(i){
   const L = LEVELS[i]; G.L = L; G.li = i;
   const W = L.hp*HP, H = U3; G.W=W; G.H=H;
   G.items=[]; G.att=[]; G.pulses=[]; G.scrollers=[]; G.peaks=[]; G.mass=0; G.ready=false; G.warn=null;
-  G.pulseT = L.pulseEvery*0.8; G.t=0; G.talkCool=0; G.growNext=.3; G.won=false; G.readySaid=false;
+  G.pulseT = L.pulseEvery*0.6; G.t=0; G.talkCool=0; G.growNext=.3; G.won=false; G.readySaid=false;
   G.knobs = L.knobs.map(([x,y,r,lab])=>({x:x*W,y:y*H,r,lab,ang:rand(-2.4,2.4)}));
   G.jacks = L.jacks.map(([x,y,lab],k)=>({x:x*W,y:y*H,r:2.9,lab,out:k===L.jacks.length-1,blink:0}));
   // ball start: upper-middle open space
   const b = G.ball = {x:W*.5,y:H*.3,vx:0,vy:0,r:L.start,spin:0,hurt:0};
   for(let n=0;n<80;n++){ if(freeAt(b.x,b.y,b.r+1)) break; b.x=rand(6,W-6); b.y=rand(H*.25,H*.6); }
   // items: heavy-tailed sizes so there's always something your size
-  G.kM=[.9,.75,.6,.5,.45][i]; const lo=L.start*.22, hi=L.goal*(.55-.04*i), need=(L.goal*L.goal-L.start*L.start)/G.kM*3;
+  G.kM=[.9,.75,.6,.5,.45][i]; const lo=L.start*.22, hi=L.goal*(.55-.04*i), need=(L.goal*L.goal-L.start*L.start)/(G.kM*Math.min(G.growth,1))*3;
   let sum=0, guard=0;
   while(sum<need && G.items.length<720 && guard++<6000){
     const s = lo*Math.pow(hi/lo, Math.pow(rnd(),1.7));
@@ -224,7 +235,7 @@ function buildLevel(i){
         G.scrollers.push({x,y,vx:0,vy:0,h:sh,cr:sh*.3,tx:x,ty:y,ph:rand(0,6),cool:0,woke:false,jonas:n===jIdx,say:'',sayT:0}); break; } }
   }
   if(L.field==='peaks') for(let n=0;n<6;n++){ for(let k=0;k<60;k++){ const x=rand(10,W-10), y=rand(H*.22,H*.85);
-      if(freeAt(x,y,4)&&Math.hypot(x-b.x,y-b.y)>12){ G.peaks.push({x,y,r:2.2,ph:rand(0,6),f:rand(.7,1.4)}); break; } } }
+      const o=G.jacks[G.jacks.length-1]; if(freeAt(x,y,4)&&Math.hypot(x-b.x,y-b.y)>12&&Math.hypot(x-o.x,y-o.y)>16){ G.peaks.push({x,y,r:2.2,ph:rand(0,6),f:rand(.7,1.4)}); break; } } }
 }
 function freeAt(x,y,r){
   for(const k of G.knobs) if(Math.hypot(x-k.x,y-k.y)<k.r+r+.5) return false;
@@ -238,7 +249,7 @@ function mkItem(t,x,y,s){
 }
 
 // ----- growth / shedding -----
-function recompute(){ const b=G.ball; b.r=Math.sqrt(G.L.start*G.L.start + G.kM*G.mass); }
+function recompute(){ const b=G.ball; b.r=Math.sqrt(G.L.start*G.L.start + G.kM*G.growth*G.mass); }
 function attach(it){
   const b=G.ball, a=Math.atan2(it.y-b.y,it.x-b.x)-b.spin;
   G.att.push({t:it.t,s:it.s,col:it.col,seed:it.seed,rot:it.rot-b.spin,ang:a,d:b.r*rand(.86,1.0),mem:it.mem});
@@ -272,10 +283,10 @@ function fieldAt(x,y,t){
 function update(dt){
   const b=G.ball, L=G.L, W=G.W, H=G.H; G.t+=dt;
   // input → acceleration
-  const acc=17*Math.pow(b.r+.5,.62);
+  const acc=23*Math.pow(b.r+.5,.62);
   b.vx+=IN.x*acc*dt; b.vy+=IN.y*acc*dt;
   const [fx,fy]=fieldAt(b.x,b.y,G.t); b.vx+=fx*dt*.9; b.vy+=fy*dt*.9;
-  const damp=Math.exp(-1.7*dt); b.vx*=damp; b.vy*=damp;
+  const damp=Math.exp(-2.1*dt); b.vx*=damp; b.vy*=damp;
   b.x+=b.vx*dt; b.y+=b.vy*dt;
   const sp=Math.hypot(b.vx,b.vy);
   b.spin += (b.vx>=0?1:-1)*sp/Math.max(b.r,.1)*dt*.8;
@@ -288,9 +299,9 @@ function update(dt){
     if(d<m && d>0){ const nx=dx/d, ny=dy/d, vn=b.vx*nx+b.vy*ny; b.x=k.x+nx*m; b.y=k.y+ny*m;
       if(vn<0){ b.vx-=1.5*vn*nx; b.vy-=1.5*vn*ny; if(-vn>b.r*7) { shed(1,nx,ny,-vn*.6); sfxThud(.5); } } k.ang+= -vn*.02; } }
   // resonance peaks
-  for(const p of G.peaks){ const pr=p.r*(1+.35*Math.sin(G.t*3*p.f+p.ph)); const dx=b.x-p.x, dy=b.y-p.y, d=Math.hypot(dx,dy), m=pr+b.r;
+  for(const p of G.peaks){ if(b.r>G.L.goal*.8) break; const pr=p.r*(1+.35*Math.sin(G.t*3*p.f+p.ph)); const dx=b.x-p.x, dy=b.y-p.y, d=Math.hypot(dx,dy), m=pr+b.r;
     if(d<m && d>0){ const nx=dx/d, ny=dy/d; b.x=p.x+nx*m; b.y=p.y+ny*m; const kick=b.r*9+12;
-      b.vx=nx*kick; b.vy=ny*kick; shed(1+((rnd()*2)|0),nx,ny,kick*.5); sfxPeak(); } }
+      b.vx=nx*kick; b.vy=ny*kick; if(rnd()<.65) shed(1,nx,ny,kick*.5); sfxPeak(); } }
   // items
   const pickR=b.r*.5;
   for(let i=G.items.length-1;i>=0;i--){ const it=G.items[i];
@@ -312,7 +323,7 @@ function update(dt){
   G.pulseT-=dt;
   if(!G.warn && G.pulseT<.9){ G.warn=pick(G.jacks.filter(j=>!j.out)); }
   if(G.warn) G.warn.blink=1;
-  if(G.pulseT<=0){ const j=G.warn; G.warn=null; j.blink=0; G.pulseT=L.pulseEvery*rand(.75,1.25);
+  if(G.pulseT<=0){ const j=G.warn; G.warn=null; j.blink=0; G.pulseT=L.pulseEvery*rand(.6,1);
     G.pulses.push({x:j.x,y:j.y,R:j.r,hit:false,v:Math.max(W,H)*.45}); sfxPulse(); }
   for(let i=G.pulses.length-1;i>=0;i--){ const p=G.pulses[i]; const R0=p.R; p.R+=p.v*dt; const band=Math.max(2.2,b.r*.5);
     const db=Math.hypot(b.x-p.x,b.y-p.y);
@@ -402,7 +413,7 @@ function render(){
   // peaks
   for(const p of G.peaks){ const pr=p.r*(1+.35*Math.sin(t*3*p.f+p.ph))*z, x=SX(p.x), y=SY(p.y);
     const g=cx.createRadialGradient(x,y,0,x,y,pr*2.6); g.addColorStop(0,'rgba(255,240,200,1)'); g.addColorStop(.3,'rgba(255,140,60,.85)'); g.addColorStop(1,'rgba(217,74,58,0)');
-    cx.fillStyle=g; cx.beginPath(); cx.arc(x,y,pr*2.6,0,7); cx.fill(); }
+    cx.globalAlpha=b.r>L.goal*.8?.3:1; cx.fillStyle=g; cx.beginPath(); cx.arc(x,y,pr*2.6,0,7); cx.fill(); cx.globalAlpha=1; }
   // free items
   const pad=40;
   for(const it of G.items){ const x=SX(it.x), y=SY(it.y), s=it.s*z; if(x<-pad-s||x>VW+pad+s||y<-pad-s||y>VH+pad+s) continue;
@@ -600,15 +611,20 @@ function capBusy(){ return capT>1.2; }
 const VEIL=document.getElementById('veil'), CARD=document.getElementById('card'), HUD=document.getElementById('hud');
 function card(html,btn,onGo,hint=''){ CARD.innerHTML=html+`<div class="jackrow"><div class="hint">${hint}</div><button class="jack" id="go" type="button">${btn}<i></i></button></div>`;
   VEIL.hidden=false; HUD.hidden=true; G.mode='card'; IN.touch=false; IN.x=IN.y=0; CAP.classList.remove('on');
+  const r=document.getElementById('growth'), ro=document.getElementById('growthOut');
+  if(r){ r.oninput=()=>{ G.growth=+r.value; ro.textContent=G.growth.toFixed(1)+'×'; try{ localStorage.setItem('de-growth',r.value); }catch(e){} if(G.L&&G.ball) recompute(); }; }
   const b=document.getElementById('go'); b.focus({preventScroll:true}); b.onclick=()=>{ audioInit(); sfxPatch(); onGo(); }; }
 function play(){ VEIL.hidden=true; HUD.hidden=false; G.mode='play'; camUpdate(0,true); setTimeout(()=>{ if(G.mode==='play') say('Otto',G.L.line0); },500); }
 
+function dial(){ return `<div class="dial"><div class="dial-top"><label for="growth">Growth rate</label><output id="growthOut" for="growth">${G.growth.toFixed(1)}×</output></div>
+    <input type="range" id="growth" min="0.6" max="2.5" step="0.1" value="${G.growth}">
+    <div class="dial-ends"><span>Slow · harder</span><span>Fast · easier</span></div></div>`; }
 function titleCard(){
   card(`<div class="kicker"><span>Brandt Elektronik</span><span>Lindenau · 1979</span></div>
     <h1 class="ctitle">Decay Envelope</h1>
     <div class="cbody"><p>An old man rolls through the five modules of a dead synthesizer, picking up whatever is loose, until he's big enough to patch it back into a voice.</p>
     <p>Outside the rack, nobody looks up from their phones. Inside it, they don't either.</p></div>
-    <dl class="specs"><dt>Move</dt><dd>Drag anywhere · WASD / arrows</dd><dt>Grow</dt><dd>Roll over anything half your size</dd><dt>Avoid</dt><dd>Gate pulses shake things loose</dd><dt>Win</dt><dd>Reach target Ø, roll into OUT</dd></dl>`,
+    <dl class="specs"><dt>Move</dt><dd>Drag anywhere · WASD / arrows</dd><dt>Grow</dt><dd>Roll over anything half your size</dd><dt>Avoid</dt><dd>Gate pulses shake things loose</dd><dt>Win</dt><dd>Reach target Ø, roll into OUT</dd></dl>${dial()}`,
     'Patch in', ()=>introCard(0), '<span class="led"></span>Sound on');
 }
 function introCard(i){
@@ -616,7 +632,7 @@ function introCard(i){
   card(`<div class="kicker"><span>Module ${i+1} / 5</span><span>${L.hp} HP · ${(L.hp*HP).toFixed(1)} mm</span></div>
     <h2 class="ctitle">${L.id}</h2><div class="kicker" style="margin-top:-6px"><span>${L.name}</span></div>
     <div class="cbody">${L.intro.map(p=>`<p>${p}</p>`).join('')}</div>
-    <dl class="specs"><dt>Start</dt><dd>Ø ${(L.start*2).toFixed(1)} mm</dd><dt>Target</dt><dd>Ø ${(L.goal*2).toFixed(1)} mm</dd><dt>Keepsake</dt><dd>${L.memento.name}, somewhere</dd></dl>`,
+    <dl class="specs"><dt>Start</dt><dd>Ø ${(L.start*2).toFixed(1)} mm</dd><dt>Target</dt><dd>Ø ${(L.goal*2).toFixed(1)} mm</dd><dt>Keepsake</dt><dd>${L.memento.name}, somewhere</dd></dl>${dial()}`,
     'Roll', play);
   camUpdate(0,true);
 }
@@ -664,6 +680,7 @@ function frame(now){ const dt=Math.min(.05,(now-last)/1000); last=now;
   if(capT>0){ capT-=dt; if(capT<=0) CAP.classList.remove('on'); }
   if(G.L) render(); requestAnimationFrame(frame); }
 document.fonts && document.fonts.ready.then(()=>{});
+try{ const g=parseFloat(localStorage.getItem('de-growth')); if(g>=.6&&g<=2.5) G.growth=g; }catch(e){}
 buildLevel(0); camUpdate(0,true); titleCard(); requestAnimationFrame(frame);
 </script>
 </body>
