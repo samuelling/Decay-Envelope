@@ -85,7 +85,10 @@ html,body{height:100%;margin:0;background:var(--panel);color:var(--silk);overflo
 #growth::-webkit-slider-thumb{-webkit-appearance:none;width:16px;height:26px;margin-top:-11px;border-radius:2px;background:linear-gradient(#d9d6cf,#8f8d88);border:1px solid #000;box-shadow:inset 0 -2px 0 #6d6b66,0 2px 4px rgba(0,0,0,.5)}
 #growth::-moz-range-thumb{width:16px;height:26px;border-radius:2px;background:linear-gradient(#d9d6cf,#8f8d88);border:1px solid #000}
 #growth:focus-visible{outline:2px solid var(--amber);outline-offset:4px}
-@media (prefers-reduced-motion:reduce){#caption,#fill{transition:none}}
+#mod.low b,#mod.low{color:#ff5a4a;animation:lowp .6s steps(2) infinite}
+@keyframes lowp{50%{opacity:.45}}
+.feed{color:#ff3d8b;font-weight:700}
+@media (prefers-reduced-motion:reduce){#caption,#fill{transition:none}#mod.low,#mod.low b{animation:none}}
 </style>
 </head>
 <body>
@@ -135,56 +138,56 @@ const MODS = {
 };
 
 const LEVELS = [
-  { mods:['VCO'], start:0.5, goal:3.0, pulseEvery:8, scrollers:2,
+  { mods:['VCO'], start:0.5, goal:3.0, pulseEvery:8, bars:56, chasers:0, scrollers:2,
     mix:{dust:3,solder:3,screw:2,nut:2,cap:1,led:3,wave:3,spark:3,plug:1},
     memento:{t:'ring',name:"Ilse's ring",line:"Ilse's ring. She took it off to knead bread, and the bread outlived her."},
     intro:["Otto Brandt is eighty-four. He repaired synthesizers in Lindenau for fifty-one years. Nobody has been born in Lindenau for eleven.",
       "He fell asleep at the bench in front of the rack he built for Ilse in 1979. It has been silent since she died. Now he is small enough to walk inside it. That slow thump is his heart, or the rack's. He stopped being able to tell years ago.",
       "<em>Roll up what's loose. Grow. When you're big enough, find the OUT jack and patch in.</em>"],
     line0:"This oscillator used to hum like a refrigerator in love. Nine years of silence. Let's see what's lying around." },
-  { mods:['LFO'], start:1.3, goal:5.5, pulseEvery:7, scrollers:3,
+  { mods:['LFO'], start:1.3, goal:5.5, pulseEvery:7, bars:44, chasers:1, scrollers:3,
     mix:{dust:2,solder:2,screw:2,nut:1,cap:2,res:2,led:3,wave:3,spark:3,plug:2,knobcap:1,heart:1},
     memento:{t:'glasses',name:'his reading glasses',line:"My reading glasses. I stopped reading when the books started reading back."},
     intro:["A low-frequency oscillator. It moves slower than you can hear, the way a tide moves. Everything in here drifts with it, you included.",
       "The first scrollers live here. They don't move much. They are mostly face, and the face is mostly lit from below.",
       "<em>Ride the current or fight it. Your choice, same as always.</em>"],
     line0:"Slow modulation. Ilse said I was a slow modulation. She meant it kindly. Mostly." },
-  { mods:['SEQ'], start:2.2, goal:8, pulseEvery:6.5, scrollers:4,
+  { mods:['SEQ'], start:2.2, goal:8, pulseEvery:6.5, bars:44, chasers:1, scrollers:4,
     mix:{screw:2,nut:2,cap:2,res:2,led:3,wave:2,spark:2,plug:2,seq:3,knobcap:2,heart:1},
     memento:{t:'ticket',name:'a ticket stub',line:"Kraftwerk, Düsseldorf, 1979. Ilse fell asleep in the second half. I fell in love twice that night."},
     intro:["A sequencer: eight steps played in a circle, forever, one per half-beat.",
       "The lit step shoves whatever stands on it toward the next one. Ride the carousel or get thrown off it.",
       "<em>Somewhere in here is a ticket stub from 1979.</em>"],
     line0:"Eight steps and back to the start. I had a routine like this. Coffee, bench, solder, bed." },
-  { mods:['VCF'], start:3, goal:10, pulseEvery:6, scrollers:5,
+  { mods:['VCF'], start:3, goal:10, pulseEvery:6, bars:46, chasers:2, scrollers:5,
     mix:{screw:2,nut:2,cap:2,res:2,led:3,chip:2,knobcap:3,plug:2,wave:2,spark:2,scope:2,heart:2,badge:1},
     memento:{t:'photo',name:'a photograph',line:"Jonas, age six, in headphones bigger than his head. He listened to everything, then."},
     intro:["A filter decides what gets through. Turn the resonance up and it starts to ring on its own, singing at the one frequency it can't let go of.",
       "Those bright peaks are resonance. They throw you. They throw everything.",
       "<em>Somewhere in here is a photograph Otto would like back.</em>"],
     line0:"Every filter has a frequency it can't let go of. Mine is a boy with headphones." },
-  { mods:['ENV'], start:3.4, goal:10.5, pulseEvery:6, scrollers:5,
+  { mods:['ENV'], start:3.4, goal:10.5, pulseEvery:6, bars:44, chasers:2, scrollers:5,
     mix:{screw:1,cap:2,res:2,led:3,chip:2,knobcap:3,plug:2,wave:3,spark:2,scope:1,heart:2,badge:1},
     memento:{t:'watch',name:"his father's watch",line:"My father's pocket watch. It still keeps time. Nothing else in the house does."},
     intro:["An envelope gives a sound its shape: attack, decay, sustain, release. Strike, fall, hold, fade.",
       "The floor is divided the same way. Attack is fast. Decay drags. Sustain holds steady. Release lets you slide.",
       "<em>His father's watch is in here. It still ticks.</em>"],
     line0:"Attack, decay, sustain, release. I'm somewhere around the release, if we're honest." },
-  { mods:['VCA'], start:4, goal:13, pulseEvery:5, scrollers:8,
+  { mods:['VCA'], start:4, goal:13, pulseEvery:5, bars:46, chasers:3, scrollers:8,
     mix:{nut:1,cap:1,res:1,chip:2,knobcap:2,plug:2,scope:2,seq:2,spark:2,heart:3,badge:3,phone:2},
     memento:{t:'letter',name:'an unsent letter',line:"The letter I wrote Jonas in '49. Never sent it. I didn't have his handle."},
     intro:["A voltage-controlled amplifier only ever makes things quieter. Gain at zero is silence. This one has been at zero for a long time.",
       "It's dark in here. The only light is yours, the parts', and theirs.",
       "<em>More scrollers. More of what falls off them.</em>"],
     line0:"An amplifier that only subtracts. I know the feeling. Turn me up a little." },
-  { mods:['DLY'], start:4.6, goal:14, pulseEvery:5, scrollers:8,
+  { mods:['DLY'], start:4.6, goal:14, pulseEvery:5, bars:46, chasers:3, scrollers:8,
     mix:{chip:2,knobcap:2,plug:2,scope:2,seq:2,cable:2,spark:3,wave:2,heart:3,badge:3,phone:2},
     memento:{t:'drawing',name:"Jonas's drawing",line:"Jonas drew the rack when he was five. He gave it a face. It was smiling."},
     intro:["A delay plays everything back a moment later, a little quieter. Then again, quieter still.",
       "In here your echoes follow you, and they pick things up too.",
       "<em>Look for a child's drawing.</em>"],
     line0:"Everything I've done comes back half a second late. At least it comes back." },
-  { mods:['VCO','LFO','SEQ','VCF','ENV','VCA','DLY','OUT'], rack:true, start:7, goal:22, pulseEvery:4.5, scrollers:18, wake:true,
+  { mods:['VCO','LFO','SEQ','VCF','ENV','VCA','DLY','OUT'], rack:true, start:7, goal:22, pulseEvery:4.5, bars:80, chasers:6, scrollers:18, wake:true,
     mix:{led:2,chip:1,knobcap:2,plug:2,scope:2,seq:2,cable:2,spark:3,wave:2,heart:3,badge:3,phone:3},
     memento:{t:'key',name:'the shop key',line:"The key to the shop. Nobody has knocked since the last repair."},
     intro:["Every module, side by side. 128 HP of the last working synthesizer in Lindenau, and every module still does what it did.",
@@ -236,6 +239,64 @@ const HEARD=["A sawtooth. Two of them, a quarter-hertz apart, beating against ea
   "The amplifier opens wide. Hi-hats, ticking like the clock in the hall.",
   "Every note comes back twice, softer each time, the way memories do.",
   ""];
+
+// scrollers who chase you to film you
+const CHASE=["omg wait. filming this","hold still old man","CONTENT","this is going viral","don't move, i'm live","chat, look at this guy"];
+const FLATTENED=["ok ok ok","my phone!!","i was LIVE","that's assault, probably","deleting this"];
+// digital debris: grows you twice as fast, then you leak faster for a while
+const DIGITAL={heart:1,badge:1,phone:1};
+
+// ===== ENDING =====
+function endingLines(){
+  const n=G.lookedUp, tot=LEVELS[LAST].scrollers, k=G.keepsakes, K=LEVELS.length;
+  const crowd = n>=10 ? `${n} of them stayed to listen. Nobody filmed it. One asked what the piece was called, and Otto realised it had never had a name.`
+    : n>=4 ? `${n} of them looked up. The rest posted that they had heard something. Otto decided that counted, a little.`
+    : `Hardly anyone looked up at first. It didn't matter. The sound was already on its way out.`;
+  const son = G.jonas ? `Jonas walks in beside him, phone in his pocket, and asks how the filter works. Otto starts at the beginning.`
+    : `Somewhere among the trees is his son. Otto has time now. The rack will keep playing until he finds him.`;
+  const keep = k===K ? `All eight keepsakes are in his coat pocket, rolled in with the screws and the dust, where they belong.`
+    : `${k} of the eight keepsakes are in his coat pocket. The rest are still in the rack. Someone will find them.`;
+  return [
+    [0.5,"The patch holds. The whole rack plays at once, louder than it was ever allowed to."],
+    [5.5,crowd],
+    [11,"The sound goes out through the main outs, through the shop window, into the street."],
+    [15,"Everywhere it reaches, the feeds stop scrolling."],
+    [19,"Screens dim. Thumbs rest. People look at what's in front of them, which turns out to be each other."],
+    [25,"By spring, the shop on Kirchgasse is a forest. Nobody can say how."],
+    [31,son],
+    [37,"The rack keeps playing in the trees. A kick like a heart. Chords like weather."],
+    [43,keep],
+    [49,"Otto sits at the edge of the clearing and lets the last note ring."],
+    [55,"Release time: long."],
+  ];
+}
+const CREDITS=[
+  ['t','Decay Envelope'],
+  ['g',''],
+  ['h','A game by'],['n','Sam Ling'],['n','& Claude'],
+  ['g',''],
+  ['h','Idea, direction, taste'],['n','Sam Ling'],
+  ['h','Code, words, synthesis'],['n','Claude'],
+  ['h','Otto Brandt, Ilse, Jonas'],['n','themselves'],
+  ['g',''],
+  ['h','Rolling, after'],['n','Katamari Damacy'],
+  ['h','Modules, after'],['n','every eurorack maker'],
+  ['h','Kick, after'],['n','the 808'],
+  ['g',''],
+  ['h','With thanks to'],
+  ['p','everyone who has ever made a game,'],
+  ['p','and everyone who has ever made music.'],
+  ['p','Whoever first hit two rocks together in time.'],
+  ['p','Whoever first drew a level on graph paper.'],
+  ['p','Every tracker tune written at 3 a.m.,'],
+  ['p','every module soldered at a kitchen table,'],
+  ['p','every patch nobody recorded.'],
+  ['p','This is built on all of it.'],
+  ['g',''],
+  ['h','For Ilse'],
+  ['g',''],
+  ['p','Thank you for looking up.'],
+];
 // ===== ENGINE: state, level build, physics =====
 const G = { li:0, mode:'title', t:0, keepsakes:0, lookedUp:0, jonas:false, got:[], growth:1.5, kickV:0, darkA:0, echoA:0 };
 const BPM=100, STEP=60/BPM/4, BAR=STEP*16;
@@ -253,7 +314,8 @@ function buildLevel(i){
   let x0=0; G.panels = L.mods.map(id=>{ const m=MODS[id], w=m.hp*HP, p={id,m,x0,w,field:m.field}; x0+=w; return p; });
   const W=G.W=x0;
   G.items=[]; G.att=[]; G.fx=[]; G.pulses=[]; G.scrollers=[]; G.peaks=[]; G.pads=[]; G.trail=[]; G.echoes=[];
-  G.mass=0; G.ready=false; G.warn=null; G.armed=false; G.lastBar=-1;
+  G.mass=0; G.ready=false; G.warn=null; G.armed=false; G.lastBar=-1; G.heat=0; G.leakAcc=0; G.warned8=false; G.barsLeft=L.bars;
+  G.lookedUp0=G.lookedUp; G.jonas0=G.jonas; G.keep0=G.keepsakes; G.got0=G.got.slice();
   G.pulseT = L.pulseEvery*0.6; G.t=0; G.talkCool=0; G.growNext=.3; G.won=false; G.readySaid=false;
   G.knobs=[]; G.jacks=[];
   G.panels.forEach((p,pi)=>{ const m=p.m;
@@ -293,6 +355,7 @@ function buildLevel(i){
       if(x>8&&x<W-8&&freeAt(x,y,sh*.4) && Math.hypot(x-b.x,y-b.y)>sh*1.5){
         G.scrollers.push({x,y,vx:0,vy:0,h:sh,cr:sh*.3,tx:x,ty:y,ph:rand(0,6),cool:0,woke:false,jonas:n===jIdx,say:'',sayT:0}); break; } }
   }
+  let nc=L.chasers||0; for(const s of G.scrollers){ if(nc<=0) break; if(s.jonas) continue; s.chaser=true; s.state='idle'; s.stun=2; s.chaseT=0; nc--; }
   G.darkA = panelAt(b.x).field==='dark'?1:0; G.echoA=0;
 }
 function panelAt(x){ const P=G.panels; for(let i=0;i<P.length;i++){ if(x<P[i].x0+P[i].w) return P[i]; } return P[P.length-1]; }
@@ -313,25 +376,26 @@ function recompute(){ const b=G.ball; b.r=Math.min((G.H-14)/2, Math.sqrt(G.L.sta
 function attach(it){
   burst(it.x,it.y,it.col||'#ffb547',it.s);
   const b=G.ball, a=Math.atan2(it.y-b.y,it.x-b.x)-b.spin;
-  G.att.push({t:it.t,s:it.s,col:it.col,seed:it.seed,rot:it.rot-b.spin,ang:a,d:b.r*rand(.86,1.0),mem:it.mem});
-  G.mass+=it.s*it.s; recompute();
+  const w=DIGITAL[it.t]?2:1; if(w>1) G.heat=Math.min(3,G.heat+Math.min(1,it.s/b.r*2.2));
+  G.att.push({t:it.t,s:it.s,col:it.col,seed:it.seed,rot:it.rot-b.spin,ang:a,d:b.r*rand(.86,1.0),mem:it.mem,w});
+  G.mass+=it.s*it.s*w; recompute();
   sfxPick(it.s/b.r, it.t);
   if(it.mem){ G.keepsakes++; G.got.push(G.L.memento.name); say('Otto',G.L.memento.line,false,6.5); }
   const p=(b.r-G.L.start)/(G.L.goal-G.L.start);
   if(!G.ready && p>=1){ G.ready=true; if(!G.readySaid){ G.readySaid=true; say('Otto',pick(OTTO.ready),false,5);} sfxReady(); }
   else if(p>G.growNext && !it.mem){ G.growNext+=.3; if(!capBusy()) say('Otto',pick(OTTO.grow)); }
 }
-function shed(n, ax, ay, sp){
+function shed(n, ax, ay, sp, quiet){
   const b=G.ball; let out=0;
   for(let i=G.att.length-1;i>=0 && out<n;i--){
     const a=G.att[i]; if(a.d<b.r*.7 || a.mem) continue;
-    G.att.splice(i,1); G.mass=Math.max(0,G.mass-a.s*a.s); out++;
+    G.att.splice(i,1); G.mass=Math.max(0,G.mass-a.s*a.s*(a.w||1)); out++;
     const ang=a.ang+b.spin, ox=Math.cos(ang), oy=Math.sin(ang);
     const it={t:a.t,s:a.s,col:a.col,seed:a.seed,rot:a.rot+b.spin,x:b.x+ox*(b.r+a.s+.2),y:b.y+oy*(b.r+a.s+.2),vr:rand(-8,8),cool:1.3};
     const v=sp*rand(.6,1.3); it.vx=b.vx+(ox*.7+ax*.6)*v; it.vy=b.vy+(oy*.7+ay*.6)*v;
     G.items.push(it);
   }
-  if(out){ recompute(); const p=(b.r-G.L.start)/(G.L.goal-G.L.start); if(p<1 && G.ready){ G.ready=false; } b.hurt=.35; sfxShed(out); }
+  if(out){ recompute(); const p=(b.r-G.L.start)/(G.L.goal-G.L.start); if(p<1 && G.ready){ G.ready=false; } if(!quiet){ b.hurt=.35; sfxShed(out); } }
   return out;
 }
 
@@ -419,16 +483,37 @@ function update(dt){
   // scrollers
   G.talkCool-=dt;
   for(const s of G.scrollers){ s.cool-=dt; s.sayT-=dt;
-    if(s.woke){ // drift toward the ball, to listen
+    if(s.chaser && !s.woke){ s.stun-=dt; const dx=b.x-s.x, dy=b.y-s.y, d=Math.hypot(dx,dy)||1, term=acc/2.1;
+      if(s.state==='idle' && s.stun<=0 && d<s.h*5 && sp>term*.3){ s.state='chase'; s.chaseT=6; s.say=pick(CHASE); s.sayT=2.5; sfxRec();
+        if(G.talkCool<=0){ G.talkCool=2.4; say('Scroller',s.say,true,2.5); } }
+      if(s.state==='chase'){ s.chaseT-=dt; s.vx+=dx/d*acc*.62*dt; s.vy+=dy/d*acc*.62*dt; s.tx=s.x; s.ty=s.y; if(s.chaseT<=0||d>s.h*10){ s.state='idle'; s.stun=4; } } }
+    if(s.chaser && s.state==='chase' && !s.woke){ /* chasing: skip wandering */ }
+    else if(s.woke){ // drift toward the ball, to listen
       const dx=b.x-s.x, dy=b.y-s.y, d=Math.hypot(dx,dy), want=b.r+s.h*.9; if(d>want){ s.vx+=dx/d*s.h*.25*dt; s.vy+=dy/d*s.h*.25*dt; } }
     else { if(Math.hypot(s.tx-s.x,s.ty-s.y)<1||rnd()<dt*.08){ s.tx=clamp(s.x+rand(-20,20),8,W-8); s.ty=clamp(s.y+rand(-20,20),H*.15,H*.93); }
       const dx=s.tx-s.x, dy=s.ty-s.y, d=Math.hypot(dx,dy)||1; s.vx+=dx/d*s.h*.04*dt; s.vy+=dy/d*s.h*.04*dt; }
     const dd=Math.exp(-2*dt); s.vx*=dd; s.vy*=dd; s.x=clamp(s.x+s.vx*dt,6,W-6); s.y=clamp(s.y+s.vy*dt,H*.12,H-7);
     const dx=s.x-b.x, dy=s.y-b.y, d=Math.hypot(dx,dy), m=s.cr+b.r;
     if(d<m && d>0){ const nx=dx/d, ny=dy/d, over=m-d; s.x+=nx*over*.5; s.y+=ny*over*.5; b.x-=nx*over*.5; b.y-=ny*over*.5;
-      const vn=b.vx*nx+b.vy*ny; if(vn>0){ b.vx-=1.4*vn*nx; b.vy-=1.4*vn*ny; s.vx+=nx*vn*.5; s.vy+=ny*vn*.5; }
-      if(s.cool<=0){ s.cool=3; bumpScroller(s,nx,ny); } }
+      const vn=b.vx*nx+b.vy*ny, rel=vn-(s.vx*nx+s.vy*ny), term=acc/2.1;
+      if(s.chaser && !s.woke && !(b.r>s.cr*1.5 && rel>term*.35)){
+        // they got you: pieces fly, then they back off to post it
+        if(s.state==='chase' && s.cool<=0){ s.cool=2.5; s.state='idle'; s.stun=6; const k=b.r*6+8; b.vx-=nx*k; b.vy-=ny*k; s.vx+=nx*k*.3; s.vy+=ny*k*.3;
+          const got=shed(2,-nx,-ny,k*.6); if(got && !capBusy()) say('Otto',pick(OTTO.shed)); }
+        else if(vn>0){ b.vx-=1.4*vn*nx; b.vy-=1.4*vn*ny; s.vx+=nx*vn*.5; s.vy+=ny*vn*.5; } }
+      else { if(vn>0){ b.vx-=1.4*vn*nx; b.vy-=1.4*vn*ny; s.vx+=nx*vn*.5; s.vy+=ny*vn*.5; }
+        if(s.chaser && !s.woke && !G.L.wake){ if(s.cool<=0){ s.cool=3; s.state='idle'; s.stun=6; s.vx+=nx*rel*.8; s.vy+=ny*rel*.8; sfxThud(.6);
+            const ph=mkItem('phone',s.x+nx*s.cr,s.y+ny*s.cr,s.h*.17); ph.vx=nx*s.h*1.4; ph.vy=ny*s.h*1.4; ph.vr=rand(-9,9); ph.cool=.5; G.items.push(ph);
+            s.say=pick(FLATTENED); s.sayT=3; if(G.talkCool<=0){ G.talkCool=2.4; say('Scroller',s.say,true,3); } } }
+        else if(s.cool<=0){ s.cool=3; bumpScroller(s,nx,ny); } } }
   }
+  // the release stage: parts drift off on their own, faster after junk food
+  G.heat*=Math.exp(-dt/7);
+  if(b.r>L.start*1.15){ G.leakAcc+=(G.li===0?0:.08+.025*G.li)*(1+G.heat*1.2)*dt; if(G.leakAcc>=1){ G.leakAcc-=1; leakOne(); } }
+  // the clock, counted in bars of the kick
+  G.barsLeft=L.bars-G.t/BAR;
+  if(!G.warned8 && G.barsLeft<=8){ G.warned8=true; say('Otto',G.ready?"Eight bars left. Get to the OUT jack.":"Eight bars left. The release is coming.",false,4); }
+  if(G.barsLeft<=0 && !G.won){ G.won=true; levelFailed(); return; }
   updateFx(dt);
   // patch in
   if(G.ready && !G.won){ const o=G.jacks.find(j=>j.out); if(Math.hypot(b.x-o.x,b.y-o.y)<b.r+o.r){ G.won=true; levelDone(); } }
@@ -446,6 +531,13 @@ function bumpScroller(s,nx,ny){
   if(G.talkCool<=0){ G.talkCool=2.4; say('Scroller',l,true,3);
     if(rnd()<.35) setTimeout(()=>{ if(G.mode==='play') say('Otto',pick(OTTO.talk)); },3200); }
 }
+
+// one random surface part drifts off (not always the newest, so it reads as wear, not punishment)
+function leakOne(){ const b=G.ball, cand=[]; for(let i=Math.max(0,G.att.length-60);i<G.att.length;i++){ const a=G.att[i]; if(a.d>=b.r*.7&&!a.mem) cand.push(i); }
+  if(!cand.length) return; const i=pick(cand), a=G.att[i]; G.att.splice(i,1); G.mass=Math.max(0,G.mass-a.s*a.s*(a.w||1));
+  const ang=a.ang+b.spin, ox=Math.cos(ang), oy=Math.sin(ang);
+  G.items.push({t:a.t,s:a.s,col:a.col,seed:a.seed,rot:a.rot+b.spin,x:b.x+ox*(b.r+a.s+.2),y:b.y+oy*(b.r+a.s+.2),vx:b.vx+ox*b.r*1.5,vy:b.vy+oy*b.r*1.5,vr:rand(-4,4),cool:1.5});
+  recompute(); if(G.ready && b.r<G.L.goal) G.ready=false; }
 // ===== RENDER =====
 const cv=document.getElementById('c'), cx=cv.getContext('2d');
 let VW=0,VH=0,DPR=1; const fog=document.createElement('canvas'), fx=fog.getContext('2d');
@@ -563,7 +655,15 @@ function drawScroller(s){ const z=CAM.z, x=SX(s.x), y=SY(s.y), h=s.h*z; if(x<-h|
   if(!s.woke){ const g=cx.createRadialGradient(hx+h*.07,hy+h*.06,0,hx+h*.07,hy+h*.06,h*.45); g.addColorStop(0,'rgba(127,211,255,.55)'); g.addColorStop(1,'rgba(127,211,255,0)');
     cx.fillStyle=g; cx.beginPath(); cx.arc(hx+h*.07,hy+h*.06,h*.45,0,7); cx.fill(); }
   cx.fillStyle=head; cx.beginPath(); cx.arc(hx,hy,h*.11,0,7); cx.fill();
-  if(!s.woke){ cx.fillStyle='#dff4ff'; cx.save(); cx.translate(hx+h*.12,hy+h*.13); cx.rotate(-.5); cx.fillRect(-h*.035,-h*.06,h*.07,h*.12); cx.restore(); }
+  const hunting=s.chaser&&!s.woke&&s.state==='chase', dazed=s.chaser&&!s.woke&&s.stun>0&&s.state!=='chase';
+  if(s.chaser&&!s.woke){ // hunters: a red ring underfoot so you can read them at a glance
+    cx.strokeStyle=hunting?'#ff3b3b':'rgba(255,59,59,.45)'; cx.lineWidth=Math.max(1.5,h*.02); cx.beginPath(); cx.ellipse(x,y,h*.3,h*.09,0,0,7); cx.stroke(); }
+  if(hunting){ // phone held up, filming, REC light blinking
+    cx.save(); cx.translate(hx+h*.2,hy-h*.02); cx.fillStyle='#0d0f11'; cx.fillRect(-h*.08,-h*.05,h*.16,h*.1); cx.fillStyle='#dff4ff'; cx.fillRect(-h*.065,-h*.04,h*.13,h*.08);
+    if(Math.sin(G.t*12)>0){ glow('#ff3b3b',h*.12,1); cx.fillStyle='#ff3b3b'; cx.beginPath(); cx.arc(h*.05,-h*.025,Math.max(1.5,h*.018),0,7); cx.fill(); } cx.restore();
+    if(h>26){ cx.font=`700 ${Math.max(9,h*.07)}px "Barlow Condensed",sans-serif`; cx.fillStyle='#ff3b3b'; cx.textAlign='center'; cx.textBaseline='middle'; cx.fillText('● REC',x,hy-h*.2); } }
+  else if(dazed){ cx.fillStyle='#ffe14d'; for(let k=0;k<3;k++){ const a=G.t*4+k*2.09; cx.beginPath(); cx.arc(hx+Math.cos(a)*h*.14,hy-h*.14+Math.sin(a)*h*.04,Math.max(1,h*.02),0,7); cx.fill(); } }
+  else if(!s.woke){ cx.fillStyle='#dff4ff'; cx.save(); cx.translate(hx+h*.12,hy+h*.13); cx.rotate(-.5); cx.fillRect(-h*.035,-h*.06,h*.07,h*.12); cx.restore(); }
   else { cx.fillStyle='#ffb547'; cx.beginPath(); cx.arc(hx-h*.04,hy-h*.01,Math.max(1,h*.014),0,7); cx.arc(hx+h*.04,hy-h*.01,Math.max(1,h*.014),0,7); cx.fill(); }
   if(s.sayT>0 && h>40){ const txt=s.say; cx.font=`500 ${Math.min(15,Math.max(11,h*.08))}px "Barlow Condensed",sans-serif`; const w=cx.measureText(txt).width+14;
     const bx=clamp(x-w/2,8,VW-w-8), by=hy-h*.25-26; cx.fillStyle=s.woke?'rgba(40,30,15,.9)':'rgba(10,25,35,.9)'; cx.fillRect(bx,by,w,22);
@@ -769,6 +869,9 @@ function sfxPeak(){ noiseHit(1400+Math.random()*900,28,.6,.5); }
 function sfxBlip(){ tone('square',1318,.03,.07,.2); setTimeout(()=>tone('square',1760,.025,.06,.2),70); }
 function sfxWake(){ tone('sine',hz(24),.08,1.4,.8); setTimeout(()=>tone('sine',hz(28),.07,1.6,.8),160); }
 function sfxReady(){ [0,3,7,12].forEach((s,i)=>setTimeout(()=>tone('triangle',hz(s+12),.08,.5,.6),i*90)); }
+function sfxRec(){ tone('square',880,.03,.06,.1); setTimeout(()=>tone('square',880,.03,.06,.1),110); }
+let lastDis=0; function sfxDissolve(){ const n=performance.now(); if(n-lastDis<90) return; lastDis=n; tone('sine',hz(scaleNote(10+((Math.random()*8)|0))),.04,.6,.9); }
+function sfxFade(){ tone('sine',hz(12),.12,1.6,.8,hz(-12)); }
 function sfxPatch(){ noiseHit(3000,2,.25,.04); tone('sine',hz(0),.12,1.8,.9); }
 
 // ===== TRANSPORT: an 808 heartbeat that builds, module by module =====
@@ -782,11 +885,15 @@ const CH=[[0,3,7],[-4,0,3],[3,7,10],[-2,2,5]], ARP=[0,1,2,1,0,2,1,2], PAT=[0,2,4
 function transportStart(){ G.T0=AC.currentTime+.15; G.nextT=G.T0; G.step=0; G.sched=setInterval(()=>{ while(G.nextT<AC.currentTime+.2){ playStep(G.step,G.nextT); G.nextT+=STEP; G.step++; } },30); }
 function playStep(n,t){ const s=n%16, bar=Math.floor(n/16), stage=G.finale?8:Math.min(G.li,7), K=KICKS[stage], v=K.h[s];
   const big=G.L&&G.L.rack||G.finale, chord=big?CH[Math.floor(bar/2)%4]:CH[0];
+  if(G.trance){ // the forest: four on the floor, rolling 16ths, offbeat bass, arps, big pads
+    if(s%4===0) kick(t,.62,.6); hat(t,s%4===2?1.6:.35,s%4===2?.12:.035); if(s%4===2) bass(t,chord[0]-12);
+    const up=END.t>30?12:0; lead(t,chord[s%3]+12+((s>>2)%2)*12+up,true); if(s===0&&bar%2===0) pad(t,chord,true); return; }
+  const thin=G.mode==='play'?G.barsLeft:99;
   if(v) kick(t,v*K.g, stage<2?1.1:.75);
-  if(G.done>=6 && s%2===0) hat(t, s%4===2?1:.4);
+  if(G.done>=6 && s%2===0 && thin>2) hat(t, s%4===2?1:.4);
   if(G.done>=5 && v>=.8) bass(t, chord[0]-12);
-  if(G.done>=3 && s%2===0){ const k=(n/2|0)%8, semi = big ? chord[ARP[k]]+12+(k===3||k===7?12:0) : scaleNote(PAT[k]+5); lead(t,semi); }
-  if(big && G.done>=3 && s===0 && bar%2===0) pad(t,chord);
+  if(G.done>=3 && s%2===0 && thin>4){ const k=(n/2|0)%8, semi = big ? chord[ARP[k]]+12+(k===3||k===7?12:0) : scaleNote(PAT[k]+5); lead(t,semi); }
+  if(big && G.done>=3 && s===0 && bar%2===0 && thin>4) pad(t,chord);
 }
 function kick(t,v,dec){ const o=AC.createOscillator(), g=AC.createGain(); o.type='sine';
   o.frequency.setValueAtTime(150,t); o.frequency.exponentialRampToValueAtTime(52,t+.07); o.frequency.exponentialRampToValueAtTime(41,t+dec*.8);
@@ -794,17 +901,17 @@ function kick(t,v,dec){ const o=AC.createOscillator(), g=AC.createGain(); o.type
   const nz=AC.createBufferSource(), f=AC.createBiquadFilter(), ng=AC.createGain(); nz.buffer=G.noise; f.type='highpass'; f.frequency.value=2500;
   ng.gain.setValueAtTime(v*.22,t); ng.gain.exponentialRampToValueAtTime(.0005,t+.015); nz.connect(f).connect(ng).connect(OUTG); nz.start(t,Math.random()); nz.stop(t+.03);
   G.kickTimes.push(t); if(G.kickTimes.length>8) G.kickTimes.shift(); }
-function hat(t,v){ const nz=AC.createBufferSource(), f=AC.createBiquadFilter(), g=AC.createGain(); nz.buffer=G.noise; f.type='highpass'; f.frequency.value=7500;
-  g.gain.setValueAtTime(.05*v,t); g.gain.exponentialRampToValueAtTime(.0004,t+.04); nz.connect(f).connect(g).connect(OUTG); nz.start(t,Math.random()); nz.stop(t+.06); }
+function hat(t,v,dec=.04){ const nz=AC.createBufferSource(), f=AC.createBiquadFilter(), g=AC.createGain(); nz.buffer=G.noise; f.type='highpass'; f.frequency.value=7500;
+  g.gain.setValueAtTime(.05*v,t); g.gain.exponentialRampToValueAtTime(.0004,t+dec); nz.connect(f).connect(g).connect(OUTG); nz.start(t,Math.random()); nz.stop(t+dec+.02); }
 function bass(t,semi){ const o=AC.createOscillator(), f=AC.createBiquadFilter(), g=AC.createGain(); o.type='sawtooth'; o.frequency.value=hz(semi);
   f.type='lowpass'; f.frequency.setValueAtTime(700,t); f.frequency.exponentialRampToValueAtTime(160,t+.25); f.Q.value=5; env(g,.004,.11,.3,t); o.connect(f).connect(g).connect(OUTG); o.start(t); o.stop(t+.4); }
-function lead(t,semi){ const o=AC.createOscillator(), f=AC.createBiquadFilter(), g=AC.createGain(); o.type=G.done>=6?'sawtooth':'triangle'; o.frequency.value=hz(semi);
-  f.type='lowpass'; f.Q.value=G.done>=4?6:1; f.frequency.value=G.done>=4? 900+1500*(.5+.5*Math.sin(t*.35)) : 1100;
-  const dec=G.done>=5?.22:.5; env(g,.005,G.done>=6?.04:.055,dec,t); o.connect(f).connect(g); g.connect(OUTG); g.connect(SEND); if(G.done>=7) g.connect(DLYIN);
+function lead(t,semi,tr){ const o=AC.createOscillator(), f=AC.createBiquadFilter(), g=AC.createGain(); o.type=G.done>=6?'sawtooth':'triangle'; o.frequency.value=hz(semi);
+  f.type='lowpass'; f.Q.value=G.done>=4?6:1; f.frequency.value= tr ? 600+Math.min(1,END.t/40)*3400 : G.done>=4? 900+1500*(.5+.5*Math.sin(t*.35)) : 1100;
+  const dec=tr?.14:G.done>=5?.22:.5; env(g,.005,tr?.03:G.done>=6?.04:.055,dec,t); o.connect(f).connect(g); g.connect(OUTG); g.connect(SEND); if(G.done>=7) g.connect(DLYIN);
   o.start(t); o.stop(t+dec+.1); }
-function pad(t,chord){ const f=AC.createBiquadFilter(), g=AC.createGain(), len=BAR*2; f.type='lowpass'; f.frequency.value=1200;
-  g.gain.setValueAtTime(0,t); g.gain.linearRampToValueAtTime(.022,t+1.2); g.gain.setValueAtTime(.022,t+len-1); g.gain.linearRampToValueAtTime(0,t+len+.4); f.connect(g); g.connect(OUTG); g.connect(SEND);
-  for(const c of chord) for(const d of [-7,7]){ const o=AC.createOscillator(); o.type='sawtooth'; o.frequency.value=hz(c); o.detune.value=d; o.connect(f); o.start(t); o.stop(t+len+.5); } }
+function pad(t,chord,big){ const f=AC.createBiquadFilter(), g=AC.createGain(), len=BAR*2, pk=big?.03:.022; f.type='lowpass'; f.frequency.value=big?2400:1200;
+  g.gain.setValueAtTime(0,t); g.gain.linearRampToValueAtTime(pk,t+(big?.4:1.2)); g.gain.setValueAtTime(pk,t+len-1); g.gain.linearRampToValueAtTime(0,t+len+.4); f.connect(g); g.connect(OUTG); g.connect(SEND);
+  for(const c of chord) for(const d of (big?[-14,-6,6,14]:[-7,7])){ const o=AC.createOscillator(); o.type='sawtooth'; o.frequency.value=hz(c); o.detune.value=d; o.connect(f); o.start(t); o.stop(t+len+.5); } }
 
 // the rack's sustained voice: drone, drift, sweep, and the bells at the very end
 function music(){
@@ -821,7 +928,7 @@ function music(){
       g.gain.setValueAtTime(0,t); g.gain.linearRampToValueAtTime(.016,t+4+i); o.connect(g).connect(SEND); o.start(); }); G.bell=true; }
 }
 function musicReset(){ for(const x of G.nodes){ try{ x.stop&&x.stop(); }catch(e){} try{ x.disconnect(); }catch(e){} } G.nodes=[];
-  G.vco=G.lfo=G.vcf=G.bell=null; G.finale=false; if(SEND) SEND.gain.value=.35; }
+  G.vco=G.lfo=G.vcf=G.bell=null; G.finale=false; G.trance=false; G.endingBg=false; if(SEND) SEND.gain.value=.35; }
 
 // ===== INPUT =====
 const IN={x:0,y:0,touch:false,ox:0,oy:0,id:null}; const KEYS=new Set();
@@ -829,7 +936,7 @@ addEventListener('keydown',e=>{ if(['ArrowUp','ArrowDown','ArrowLeft','ArrowRigh
 addEventListener('keyup',e=>{ KEYS.delete(e.key.toLowerCase()); keyIn(); });
 function keyIn(){ if(IN.touch) return; let x=0,y=0; if(KEYS.has('arrowleft')||KEYS.has('a')) x--; if(KEYS.has('arrowright')||KEYS.has('d')) x++; if(KEYS.has('arrowup')||KEYS.has('w')) y--; if(KEYS.has('arrowdown')||KEYS.has('s')) y++;
   const m=Math.hypot(x,y)||1; IN.x=x/m; IN.y=y/m; }
-cv.addEventListener('pointerdown',e=>{ if(G.mode!=='play') return; IN.touch=true; IN.id=e.pointerId; IN.ox=e.clientX; IN.oy=e.clientY; IN.x=IN.y=0; cv.setPointerCapture(e.pointerId); });
+cv.addEventListener('pointerdown',e=>{ if(G.mode==='ending'){ endingTap(); return; } if(G.mode!=='play') return; IN.touch=true; IN.id=e.pointerId; IN.ox=e.clientX; IN.oy=e.clientY; IN.x=IN.y=0; cv.setPointerCapture(e.pointerId); });
 cv.addEventListener('pointermove',e=>{ if(!IN.touch||e.pointerId!==IN.id) return; let dx=(e.clientX-IN.ox)/56, dy=(e.clientY-IN.oy)/56; const m=Math.hypot(dx,dy);
   if(m>1){ IN.ox+=(dx/m)*(m-1)*56; IN.oy+=(dy/m)*(m-1)*56; dx/=m; dy/=m; } IN.x=dx; IN.y=dy; });
 const endTouch=e=>{ if(e.pointerId!==IN.id) return; IN.touch=false; IN.x=IN.y=0; keyIn(); };
@@ -857,7 +964,7 @@ function titleCard(){
     <h1 class="ctitle">Decay Envelope</h1>
     <div class="cbody"><p>An old man rolls through the eight modules of a dead synthesizer, picking up whatever is loose, until he's big enough to patch it back into a voice.</p>
     <p>Outside the rack, nobody looks up from their phones. Inside it, they don't either.</p></div>
-    <dl class="specs"><dt>Move</dt><dd>Drag anywhere · WASD / arrows</dd><dt>Grow</dt><dd>Roll over anything half your size</dd><dt>Avoid</dt><dd>Gate pulses, on the downbeat</dd><dt>Win</dt><dd>Reach target Ø, roll into OUT</dd></dl>${dial()}`,
+    <dl class="specs"><dt>Move</dt><dd>Drag anywhere · WASD / arrows</dd><dt>Grow</dt><dd>Roll over anything half your size</dd><dt>Clock</dt><dd>Each module lasts a set number of bars</dd><dt>Leak</dt><dd>Parts drift off you over time</dd><dt>Feed</dt><dd>Hearts, badges, phones: big growth, faster leak</dd><dt>Avoid</dt><dd>Downbeat pulses; red-ringed hunters who film you</dd><dt>Win</dt><dd>Reach target Ø, roll into OUT</dd></dl>${dial()}`,
     'Patch in', ()=>introCard(0), '<span class="led"></span>Sound on');
 }
 function introCard(i){
@@ -865,7 +972,7 @@ function introCard(i){
   card(`<div class="kicker"><span>${L.rack?'Final level':`Module ${i+1} / ${LAST}`}</span><span>${hp} HP · ${(hp*HP).toFixed(1)} mm</span></div>
     <h2 class="ctitle">${lvlId(L)}</h2><div class="kicker" style="margin-top:-6px"><span>${lvlName(L)}</span></div>
     <div class="cbody">${L.intro.map(p=>`<p>${p}</p>`).join('')}</div>
-    <dl class="specs"><dt>Start</dt><dd>Ø ${(L.start*2).toFixed(1)} mm</dd><dt>Target</dt><dd>Ø ${(L.goal*2).toFixed(1)} mm</dd><dt>Keepsake</dt><dd>${L.memento.name}, somewhere</dd></dl>${dial()}`,
+    <dl class="specs"><dt>Start</dt><dd>Ø ${(L.start*2).toFixed(1)} mm</dd><dt>Target</dt><dd>Ø ${(L.goal*2).toFixed(1)} mm</dd><dt>Time</dt><dd>${L.bars} bars · ${Math.round(L.bars*BAR)} s</dd><dt>Hunters</dt><dd>${L.chasers||'none'}</dd><dt>Keepsake</dt><dd>${L.memento.name}, somewhere</dd></dl>${dial()}`,
     'Roll', play);
   camUpdate(0,true);
 }
@@ -873,45 +980,163 @@ const lvlId=L=>L.rack?'RACK':L.mods[0], lvlName=L=>L.rack?'The whole rack':MODS[
 function levelDone(){
   const i=G.li, L=G.L; G.done=i+1; if(i===LAST) G.finale=true; music();
   const kept = G.got.includes(L.memento.name);
-  if(i===LAST) return setTimeout(endCard,600);
+  if(i===LAST){ G.endingBg=true; return setTimeout(startEnding,700); }
   setTimeout(()=>card(`<div class="kicker"><span>Patched</span><span>Ø ${(G.ball.r*2).toFixed(1)} mm</span></div>
     <h2 class="ctitle small">${lvlId(L)} → OUT</h2>
     <div class="cbody"><p>${HEARD[i]}</p><p>${kept?`He carries ${L.memento.name} with him.`:`He didn't find ${L.memento.name}. It's still in there, somewhere under the ${lvlId(L)}.`}</p></div>`,
     'Next module', ()=>introCard(i+1), `${G.done} of ${LEVELS.length} voices`),500);
 }
-function endCard(){
+function finalCard(){
   const n=G.lookedUp, tot=LEVELS[LAST].scrollers, k=G.keepsakes, K=LEVELS.length;
-  const p2 = n>=10 ? `${n} of them stayed to listen. They didn't film it. One asked what the piece was called, and Otto realised it had never had a name.`
-    : n>=4 ? `${n} of them looked up. The rest posted that they had heard something. Otto decided that counted, a little.`
-    : `Hardly anyone looked up. It got forty-one thousand views. Otto doesn't know what that means, and he suspects nobody does.`;
-  const p3 = G.jonas ? `Jonas sat down on the floor of the output stage, the way he used to at six, and didn't take out his phone.`
-    : `His son was somewhere in that crowd. Otto didn't find him this time. The patch stays plugged in. He can try again tomorrow.`;
-  const p4 = k===K ? `He kept all eight keepsakes. He rolled them into the same ball as the screws and the dust, which is where they belonged.`
-    : `He kept ${k} of eight keepsakes${k?`: ${G.got.join(', ')}`:''}.`;
   card(`<div class="kicker"><span>Main out</span><span>Release: long</span></div>
     <h2 class="ctitle">Release</h2>
-    <div class="cbody"><p>The rack plays. A kick like a slow heart, sawtooth, tide, eight steps going round, a filter opening its mouth, hats, echoes, and chords on top, all of it washing out through the main outs into a room nobody has visited in years.</p>
-    <p>${p2}</p><p>${p3}</p><p>${p4}</p></div>
-    <dl class="specs"><dt>Looked up</dt><dd>${n} / ${tot}</dd><dt>Keepsakes</dt><dd>${k} / ${K}</dd><dt>Final Ø</dt><dd>${(G.ball.r*2).toFixed(1)} mm</dd></dl>`,
-    'Play again', ()=>{ musicReset(); Object.assign(G,{keepsakes:0,lookedUp:0,jonas:false,got:[],done:0,finale:false}); introCard(0); }, 'The patch keeps playing');
+    <div class="cbody"><p>Otto patched the whole rack, and Lindenau grew a forest.</p></div>
+    <dl class="specs"><dt>Looked up</dt><dd>${n} / ${tot}</dd><dt>Jonas</dt><dd>${G.jonas?'found':'still out there'}</dd><dt>Keepsakes</dt><dd>${k} / ${K}</dd><dt>Final Ø</dt><dd>${(G.ball.r*2).toFixed(1)} mm</dd></dl>`,
+    'Play again', ()=>{ musicReset(); Object.assign(G,{keepsakes:0,lookedUp:0,jonas:false,got:[],done:0,finale:false}); introCard(0); }, 'The forest keeps playing');
 }
+const FADE=["Not yet, then.","My hands used to be faster.","Ilse would say: again, but slower.","The note ran out before I did. That's new."];
+function levelFailed(){ const i=G.li, L=G.L; sfxFade();
+  Object.assign(G,{lookedUp:G.lookedUp0,jonas:G.jonas0,keepsakes:G.keep0,got:G.got0.slice()});
+  setTimeout(()=>card(`<div class="kicker"><span>Out of time</span><span>Ø ${(G.ball.r*2).toFixed(1)} / ${(L.goal*2).toFixed(1)} mm</span></div>
+    <h2 class="ctitle small">The patch faded</h2>
+    <div class="cbody"><p><em>${pick(FADE)}</em></p><p>The envelope released before he reached the OUT jack. The ${lvlId(L)} is still there, and so is he.</p></div>${dial()}`,
+    'Try again', ()=>introCard(i), 'Slide right for an easier run'),500); }
 
 // ===== HUD + LOOP =====
 const $=id=>document.getElementById(id); const H_MOD=$('mod'), H_TXT=$('meterTxt'), H_FILL=$('fill'), H_TK=$('tk'), H_TU=$('tu');
 $('mute').onclick=()=>{ audioInit(); muted=!muted; if(OUTG) OUTG.gain.setTargetAtTime(muted?0:.9,AC.currentTime,.05); $('mute').textContent=muted?'Muted':'Sound'; };
 function hud(){ const b=G.ball, L=G.L, p=clamp((b.r-L.start)/(L.goal-L.start),0,1);
-  const pp=panelAt(b.x); H_MOD.innerHTML= L.rack ? `<b>RACK</b> · ${pp.id}` : `<b>${pp.id}</b> · ${pp.m.hp}HP`;
-  H_TXT.innerHTML = G.ready ? `<b>Ø ${(b.r*2).toFixed(1)} mm</b> · roll into OUT` : `Ø <b>${(b.r*2).toFixed(1)}</b> mm / ${(L.goal*2).toFixed(1)} mm`;
+  const pp=panelAt(b.x), bl=Math.max(0,Math.ceil(G.barsLeft)); H_MOD.innerHTML= `<b>${L.rack?'RACK':pp.id}</b> · ${bl} bars`; H_MOD.classList.toggle('low',bl<=8);
+  const feed=G.heat>.25?` · <span class="feed">leak ×${(1+G.heat*1.2).toFixed(1)}</span>`:'';
+  H_TXT.innerHTML = (G.ready ? `<b>Ø ${(b.r*2).toFixed(1)} mm</b> · roll into OUT` : `Ø <b>${(b.r*2).toFixed(1)}</b> / ${(L.goal*2).toFixed(1)} mm`)+feed;
   H_FILL.style.width=(p*100).toFixed(1)+'%'; H_FILL.classList.toggle('ready',G.ready); H_TK.textContent=G.keepsakes; H_TU.textContent=G.lookedUp; }
 let last=performance.now();
 function frame(now){ const dt=Math.min(.05,(now-last)/1000); last=now;
   if(AC&&G.T0!=null){ const nw=AC.currentTime; let lk=-1; for(const k of G.kickTimes) if(k<=nw&&k>lk) lk=k; G.kickV=lk>0?Math.exp(-(nw-lk)*7):0; }
   if(G.mode==='play'){ update(dt); hud(); camUpdate(dt); } else if(G.L){ G.t+=dt*.3; }
   if(capT>0){ capT-=dt; if(capT<=0) CAP.classList.remove('on'); }
-  if(G.L) render(); requestAnimationFrame(frame); }
+  if(G.endingBg) drawEnding(dt); else if(G.L) render(); requestAnimationFrame(frame); }
 document.fonts && document.fonts.ready.then(()=>{});
 try{ const g=parseFloat(localStorage.getItem('de-growth')); if(g>=.6&&g<=2.5) G.growth=g; }catch(e){}
 buildLevel(0); camUpdate(0,true); titleCard(); requestAnimationFrame(frame);
+// ===== ENDING: the release, the blight lifting, the trance forest, the credits =====
+const END={t:0,lines:[],feeds:[],parts:[],flies:[],walkers:[],layers:[],creditsAt:61,cred:null,fin:false};
+function startEnding(){
+  G.mode='ending'; G.trance=true; VEIL.hidden=true; HUD.hidden=true; CAP.classList.remove('on');
+  Object.assign(END,{t:0,lines:endingLines(),parts:[],fin:false,cred:null});
+  END.feeds=[]; for(let i=0;i<70;i++) END.feeds.push({x:Math.random(),y:Math.random()*1.6,w:rand(.18,.34),h:rand(.08,.16),sp:rand(.05,.11),hue:rand(185,215),gone:false});
+  END.flies=[]; for(let i=0;i<110;i++) END.flies.push({x:Math.random(),y:rand(.35,.95),ph:rand(0,6.28),r:rand(1.2,3.2),col:pick(NEON),sp:rand(.2,.8)});
+  END.walkers=[]; for(let i=0;i<16;i++) END.walkers.push({x:rand(-.6,.2),y:rand(.8,.9),sp:rand(.012,.03),h:rand(.06,.09),ph:rand(0,6)});
+  // four parallax layers of trees, back to front
+  END.layers=[['#5b3d9e',.010,.6,.3],['#3d2a7a',.018,.66,.36],['#251a52',.03,.73,.42],['#0d0a22',.05,.81,.5]].map(([col,sp,base,hmax],li)=>{
+    const trees=[]; for(let k=0;k<26-li*4;k++) trees.push({x:k/(26-li*4)+rand(-.02,.02),h:rand(hmax*.55,hmax),w:rand(.03,.06)*(1+li*.4),kind:Math.random()<.6?0:1});
+    return {col,sp,base,trees}; });
+}
+function endingTap(){ if(END.t<END.creditsAt-1) END.t=END.creditsAt-1; else finishEnding(); }
+function finishEnding(){ if(END.fin) return; END.fin=true; finalCard(); }
+
+function drawEnding(dt){
+  END.t+=dt; const t=END.t; cx.setTransform(DPR,0,0,DPR,0,0);
+  const k=G.kickV;
+  if(t<24){ if(t<12) endRack(t); else endBlight(t-12); }
+  if(t>=21){ cx.globalAlpha=clamp((t-21)/3,0,1); endForest(t); cx.globalAlpha=1; }
+  endCaptions(t);
+  if(t>=END.creditsAt) endCredits(t-END.creditsAt);
+  cx.font='600 11px "Barlow Condensed",sans-serif'; cx.fillStyle='rgba(235,230,217,.45)'; cx.textAlign='right'; cx.textBaseline='alphabetic';
+  cx.letterSpacing='1.5px'; cx.fillText(t<END.creditsAt-1?'TAP TO SKIP':'TAP TO CONTINUE',VW-16,VH-14); cx.letterSpacing='0px';
+}
+
+// 1. the whole rack lit, cables swaying, glow building at MAIN OUT
+function endRack(t){ cx.fillStyle='#07080a'; cx.fillRect(0,0,VW,VH); const k=G.kickV;
+  const sc=1.5-Math.min(.5,t/11*.5), W=VW*.92*sc, H=W*.2, x0=VW/2-W/2, y0=VH*.42-H/2; let x=x0;
+  const tot=LEVELS[LAST].mods.reduce((a,m)=>a+MODS[m].hp,0);
+  LEVELS[LAST].mods.forEach((id,i)=>{ const w=W*MODS[id].hp/tot; cx.fillStyle='#17191a'; cx.fillRect(x,y0,w-1,H); cx.strokeStyle='#000'; cx.strokeRect(x,y0,w-1,H);
+    cx.fillStyle='#ebe6d9'; cx.font=`400 ${Math.max(8,H*.12)}px "Major Mono Display",monospace`; cx.textAlign='center'; cx.textBaseline='middle'; cx.fillText(id,x+w/2,y0+H*.16);
+    for(let j=0;j<3;j++){ const on=Math.sin(t*(3+i)+j*2)>-.2; const lx=x+w*(.25+.25*j), ly=y0+H*.55; if(on){ cx.save(); cx.translate(lx,ly); glow(NEON[(i+j)%8],H*.14*(1+k),.9); cx.restore(); }
+      cx.fillStyle=on?NEON[(i+j)%8]:'#333'; cx.beginPath(); cx.arc(lx,ly,Math.max(1.5,H*.03),0,7); cx.fill(); }
+    x+=w; });
+  // patch cables arcing between modules
+  for(let i=0;i<7;i++){ const a=x0+W*(i+.6)/8, b=x0+W*(i+1.4)/8, sag=H*(.6+.25*Math.sin(t*1.2+i)); cx.strokeStyle=NEON[(i*3)%8]; cx.lineWidth=Math.max(2,H*.035); cx.lineCap='round';
+    cx.beginPath(); cx.moveTo(a,y0+H*.85); cx.bezierCurveTo(a,y0+H*.85+sag,b,y0+H*.85+sag,b,y0+H*.85); cx.stroke(); }
+  const gx=x0+W*.97, gy=y0+H*.8, gr=H*(.4+t*.25)*(1+k*.3); cx.save(); cx.translate(gx,gy); glow('#ffb547',gr,.9); cx.restore();
+}
+// 2. the scroll blight: feeds everywhere, then the release ring melts them into sparks
+function endBlight(u){ const k=G.kickV, cxm=VW/2, cym=VH*.45, R=Math.max(0,(u-1.5)/8)*Math.hypot(VW,VH);
+  cx.fillStyle='#050913'; cx.fillRect(0,0,VW,VH);
+  cx.save(); cx.translate(cxm,cym); const g=cx.createRadialGradient(0,0,0,0,0,Math.max(1,R)); g.addColorStop(0,'#3a1a5e'); g.addColorStop(.85,'#21103e'); g.addColorStop(1,'rgba(33,16,62,0)');
+  cx.fillStyle=g; cx.beginPath(); cx.arc(0,0,Math.max(1,R),0,7); cx.fill(); cx.restore();
+  for(const f of END.feeds){ if(f.gone) continue; f.y-=f.sp*1/60; if(f.y<-.25) f.y+=1.6;
+    const x=f.x*VW-f.w*VW/2, y=f.y*VH, w=f.w*VW, h=f.h*VH;
+    if(Math.hypot(x+w/2-cxm,y+h/2-cym)<R){ f.gone=true; for(let i=0;i<10;i++) END.parts.push({x:x+Math.random()*w,y:y+Math.random()*h,vx:rand(-20,20),vy:rand(-80,-30),life:rand(1.5,3),col:pick(NEON)}); sfxDissolve(); continue; }
+    cx.fillStyle=`hsla(${f.hue},70%,14%,.95)`; rr(x,y,w,h,8); cx.fill(); cx.strokeStyle=`hsla(${f.hue},90%,65%,.5)`; cx.lineWidth=1; cx.stroke();
+    cx.fillStyle=`hsla(${f.hue},90%,70%,.55)`; for(let l=0;l<3;l++) cx.fillRect(x+w*.08,y+h*(.25+l*.22),w*(.5+.3*((l*.37+f.hue)%1)),h*.08);
+    cx.fillStyle='#ff3d8b'; cx.beginPath(); cx.arc(x+w*.88,y+h*.3,h*.08,0,7); cx.fill(); }
+  if(R>0){ cx.strokeStyle=`rgba(255,181,71,${.8})`; cx.lineWidth=6+k*6; cx.beginPath(); cx.arc(cxm,cym,R,0,7); cx.stroke(); cx.save(); cx.translate(cxm,cym); glow('#ffb547',Math.min(R,VW*.3)*.6,.6); cx.restore(); }
+  endParts(1/60);
+}
+function endParts(dt){ cx.save(); cx.globalCompositeOperation='lighter'; for(let i=END.parts.length-1;i>=0;i--){ const p=END.parts[i]; p.life-=dt; if(p.life<=0){ END.parts.splice(i,1); continue; }
+  p.x+=p.vx*dt; p.y+=p.vy*dt; p.vx+=Math.sin(p.y*.05)*10*dt; cx.save(); cx.translate(p.x,p.y); glow(p.col,6,Math.min(1,p.life)); cx.restore(); } cx.restore(); }
+
+// 3. the trance forest
+function endForest(t){ const k=G.kickV, ga=cx.globalAlpha, hz0=VH*.66;
+  const sky=cx.createLinearGradient(0,0,0,hz0); sky.addColorStop(0,'#0b0820'); sky.addColorStop(.55,'#3a1a5e'); sky.addColorStop(.85,'#b8457a'); sky.addColorStop(1,'#ff9a5a');
+  cx.fillStyle=sky; cx.fillRect(0,0,VW,VH);
+  // stars
+  for(let i=0;i<60;i++){ const sx=(i*137.5%1000)/1000*VW, sy=(i*71.3%1000)/1000*hz0*.55; cx.fillStyle=`rgba(255,255,255,${.25+.25*Math.sin(t*2+i)})`; cx.fillRect(sx,sy,1.5,1.5); }
+  // aurora ribbons
+  cx.save(); cx.globalCompositeOperation='lighter';
+  [['#33e1ff',.18],['#ff3d8b',.26],['#b6ff3b',.34]].forEach(([c,yy],i)=>{ cx.globalAlpha=ga*(.16+.06*k); cx.fillStyle=c; cx.beginPath();
+    for(let x=0;x<=VW;x+=12){ const y=VH*yy+Math.sin(x*.008+t*(.3+i*.1)+i)*VH*.05; x?cx.lineTo(x,y):cx.moveTo(x,y); }
+    for(let x=VW;x>=0;x-=12){ const y=VH*yy+Math.sin(x*.008+t*(.3+i*.1)+i)*VH*.05+VH*(.05+.03*Math.sin(x*.01+t)); cx.lineTo(x,y); } cx.fill(); });
+  cx.restore(); cx.globalAlpha=ga;
+  // sun on the horizon, breathing with the kick, and its rays
+  const sx=VW*.62, sy=hz0*.98; cx.save(); cx.translate(sx,sy); glow('#ffd27a',VH*(.22+.03*k),ga*.9); cx.restore();
+  cx.save(); cx.globalCompositeOperation='lighter'; for(let i=0;i<7;i++){ const a=-Math.PI/2+(i-3)*.22+Math.sin(t*.2+i)*.03; cx.globalAlpha=ga*(.05+.05*k);
+    cx.fillStyle='#ffd27a'; cx.beginPath(); cx.moveTo(sx,sy); cx.lineTo(sx+Math.cos(a-.04)*VH,sy+Math.sin(a-.04)*VH); cx.lineTo(sx+Math.cos(a+.04)*VH,sy+Math.sin(a+.04)*VH); cx.fill(); } cx.restore(); cx.globalAlpha=ga;
+  // trees, parallax
+  END.layers.forEach((L,li)=>{ const off=(t*L.sp)%1; cx.fillStyle=L.col;
+    for(const tr of L.trees){ let x=((tr.x-off)%1+1)%1; x=x*(VW*1.2)-VW*.1; const base=VH*L.base+VH*li*.02, h=tr.h*VH, w=tr.w*VW;
+      if(tr.kind===0){ for(let s=0;s<3;s++){ const yy=base-h*(.25+s*.25), ww=w*(1.2-s*.3); cx.beginPath(); cx.moveTo(x,yy-h*.35); cx.lineTo(x-ww,yy+h*.08); cx.lineTo(x+ww,yy+h*.08); cx.fill(); } cx.fillRect(x-w*.08,base-h*.2,w*.16,h*.2+VH); }
+      else { cx.fillRect(x-w*.1,base-h*.7,w*.2,h*.7+VH); cx.beginPath(); cx.arc(x,base-h*.75,w*.9,0,7); cx.arc(x-w*.6,base-h*.6,w*.6,0,7); cx.arc(x+w*.6,base-h*.62,w*.65,0,7); cx.fill(); } }
+    // the layer's own rolling hill, so trunks sit in ground rather than standing on sky
+    const base=VH*L.base+VH*li*.02; cx.beginPath(); cx.moveTo(0,VH); for(let x=0;x<=VW;x+=10){ cx.lineTo(x,base-VH*.018*Math.sin((x/VW+off*1.3)*6.283*(1+li*.4)+li)); } cx.lineTo(VW,VH); cx.fill();
+    // mist between layers, lit pink from the horizon
+    if(li<3){ const m=cx.createLinearGradient(0,base-VH*.06,0,base+VH*.04); m.addColorStop(0,'rgba(255,140,190,0)'); m.addColorStop(.6,`rgba(255,140,190,${.16-li*.04})`); m.addColorStop(1,'rgba(255,140,190,0)');
+      cx.fillStyle=m; cx.fillRect(0,base-VH*.06,VW,VH*.1); } });
+  // ground with glowing plants
+  cx.fillStyle='#06050f'; cx.fillRect(0,VH*.84,VW,VH*.16);
+  for(let i=0;i<40;i++){ const x=(i/40)*VW+Math.sin(i*3.1)*10, h=VH*(.02+.02*((i*.37)%1)), sw=Math.sin(t*1.5+i)*4; cx.strokeStyle='#0f0d24'; cx.lineWidth=2;
+    cx.beginPath(); cx.moveTo(x,VH*.86); cx.quadraticCurveTo(x+sw,VH*.86-h*.5,x+sw*1.5,VH*.86-h); cx.stroke();
+    if(i%3===0){ cx.save(); cx.translate(x+sw*1.5,VH*.86-h); glow(NEON[i%8],5+4*k,ga*.8); cx.restore(); } }
+  // people walking in, faces lit warm, phones away
+  for(const w of END.walkers){ w.x+=w.sp/60; if(w.x>1.1) w.x=-.15; const x=w.x*VW, y=VH*w.y, h=VH*w.h, bob=Math.sin(t*4+w.ph)*h*.03;
+    cx.fillStyle='#0c0a1c'; cx.beginPath(); cx.ellipse(x,y-h*.35+bob,h*.12,h*.33,0,0,7); cx.fill(); cx.beginPath(); cx.arc(x,y-h*.8+bob,h*.1,0,7); cx.fill();
+    cx.fillStyle='#ffb547'; cx.beginPath(); cx.arc(x+h*.04,y-h*.82+bob,Math.max(1,h*.02),0,7); cx.fill(); }
+  // Otto, sitting by the rack at the edge of the clearing
+  const ox=VW*.16, oy=VH*.88, oh=VH*.11; cx.fillStyle='#17191a'; cx.fillRect(ox+oh*.35,oy-oh*.45,oh*.9,oh*.45); cx.strokeStyle='#000'; cx.strokeRect(ox+oh*.35,oy-oh*.45,oh*.9,oh*.45);
+  for(let i=0;i<6;i++){ const lx=ox+oh*(.45+i*.14), ly=oy-oh*.3, on=Math.sin(t*5+i)>0||k>.5; if(on){ cx.save(); cx.translate(lx,ly); glow(NEON[i],oh*.08*(1+k),ga); cx.restore(); } }
+  cx.fillStyle='#0c0a1c'; cx.beginPath(); cx.ellipse(ox,oy-oh*.3,oh*.16,oh*.28,-.15,0,7); cx.fill(); cx.beginPath(); cx.arc(ox+oh*.05,oy-oh*.68,oh*.11,0,7); cx.fill();
+  cx.fillStyle='#ffb547'; cx.beginPath(); cx.arc(ox+oh*.1,oy-oh*.7,Math.max(1,oh*.02),0,7); cx.fill();
+  // fireflies on the beat
+  cx.save(); cx.globalCompositeOperation='lighter'; for(const f of END.flies){ const x=((f.x+Math.sin(t*f.sp+f.ph)*.03)%1)*VW, y=(f.y+Math.cos(t*f.sp*1.3+f.ph)*.02)*VH;
+    const a=ga*(.4+.6*Math.max(0,Math.sin(t*2*f.sp+f.ph)))*(.7+.6*k); cx.save(); cx.translate(x,y); glow(f.col,f.r*4,a); cx.restore(); } cx.restore();
+  if(t<26) endParts(1/60);
+}
+// captions: one line at a time, Otto's register
+function endCaptions(t){ if(t>END.creditsAt-1) return; const L=END.lines; let cur=-1; for(let i=0;i<L.length;i++) if(t>=L[i][0]) cur=i; if(cur<0) return;
+  const t0=L[cur][0], t1=cur+1<L.length?L[cur+1][0]:END.creditsAt-1, a=clamp(Math.min((t-t0)/.8,(t1-t)/.8),0,1);
+  const fs=clamp(VW*.05,18,26), maxW=Math.min(VW-48,560); cx.font=`italic 300 ${fs}px "Spectral",Georgia,serif`; const lines=wrapText(L[cur][1],maxW);
+  const lh=fs*1.38, h=lines.length*lh, y0=VH*.72-h/2; cx.globalAlpha=a*.6; cx.fillStyle='#05040c'; rr(VW/2-maxW/2-14,y0-12,maxW+28,h+24,4); cx.fill();
+  cx.globalAlpha=a; cx.fillStyle='#f3ecdc'; cx.textAlign='center'; cx.textBaseline='top'; lines.forEach((ln,i)=>cx.fillText(ln,VW/2,y0+i*lh)); cx.globalAlpha=1; }
+function wrapText(txt,maxW){ const out=[]; let line=''; for(const w of txt.split(' ')){ const test=line?line+' '+w:w; if(cx.measureText(test).width>maxW&&line){ out.push(line); line=w; } else line=test; } if(line) out.push(line); return out; }
+// credits roll up through the forest
+function endCredits(u){ cx.fillStyle=`rgba(4,3,10,${Math.min(.5,u*.2)})`; cx.fillRect(0,0,VW,VH);
+  const sizes={t:[34,'400',"Major Mono Display",'#f3ecdc'],h:[12,'600',"Barlow Condensed",'#b8b2a4'],n:[22,'400',"Spectral",'#f3ecdc'],p:[17,'italic 300',"Spectral",'#e6dfcf'],g:[0]};
+  let y=VH+20-u*34, last=y; cx.textAlign='center'; cx.textBaseline='top';
+  for(const [ty,txt] of CREDITS){ const [fs,w,f,c]=sizes[ty]; if(ty==='g'){ y+=30; continue; }
+    if(y>-40&&y<VH+40){ cx.font=`${w} ${fs}px "${f}",serif`; cx.fillStyle=c; if(ty==='h'){ cx.letterSpacing='2.5px'; cx.fillText(txt.toUpperCase(),VW/2,y); cx.letterSpacing='0px'; } else cx.fillText(txt,VW/2,y); }
+    y+=fs*(ty==='h'?1.7:1.5)+(ty==='t'?14:ty==='n'?10:0); last=y; }
+  if(last<VH*.35) finishEnding(); }
 </script>
 </body>
 </html>

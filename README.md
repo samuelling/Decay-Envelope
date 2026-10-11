@@ -11,7 +11,11 @@ Otto Brandt, 84, repaired synthesizers in Lindenau for fifty-one years. Nobody h
 - **Move:** drag anywhere (touch or mouse), or WASD / arrow keys.
 - **Grow:** roll over anything up to half your diameter. Bigger things get shoved.
 - **Chaos:** every few seconds a gate pulse fires from a blinking jack and knocks pieces off you. Knobs are walls until you outgrow them.
-- **Win a module:** reach the target diameter, then roll into the OUT jack.
+- **Win a module:** reach the target diameter, then roll into the OUT jack before the clock runs out.
+- **Clock:** each module lasts a set number of bars of the kick. In the last 8 bars the HUD turns red and the music thins out. Run out and the patch fades; you retry the module.
+- **Leak:** from level 2 on, parts slowly drift off you on their own, like a note in its release stage. You only grow if you collect faster than you drain.
+- **Feed:** hearts, badges and phones grow you twice as fast, but they speed up your leak for a while (the HUD shows the multiplier). Real parts grow you slowly with no penalty.
+- **Hunters:** red-ringed scrollers notice you when you move fast nearby and chase you to film you. If they catch you, pieces fly. Outrun them, or get big enough and hit them hard to knock their phone loose.
 - **Difficulty:** the growth-rate slider on the title and module cards scales how much each pickup grows you (0.6× to 2.5×, default 1.5×). It's remembered between sessions.
 
 ## The modules
@@ -34,6 +38,14 @@ Seven single-module levels, then a final level that spans the whole 128HP rack. 
 An 808 kick runs under everything at 100 BPM. In level 1 it is Otto's slow lub-dub heartbeat; it gets louder and busier each level until it is four on the floor in the final rack. Gate pulses fire on the downbeat, and the parts on the floor jump with every kick.
 
 Each level hides one keepsake. The ending changes with how many scrollers looked up, whether you found Jonas, and how many of the eight keepsakes you kept.
+
+## Ending
+
+Patching the final rack plays a short animated ending: the rack lights up, a release wave dissolves the scrolling feeds, and Lindenau becomes a trance forest while the music opens into four-on-the-floor arps and pads. Captions change with how many scrollers looked up, whether you found Jonas, and how many keepsakes you kept. Then the credits roll. Tap to skip.
+
+## Credits
+
+A game by Sam Ling and Claude, with thanks to everyone who has ever made a game or made music.
 
 ## Tech
 
