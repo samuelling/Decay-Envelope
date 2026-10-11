@@ -88,6 +88,8 @@ html,body{height:100%;margin:0;background:var(--panel);color:var(--silk);overflo
 #mod.low b,#mod.low{color:#ff5a4a;animation:lowp .6s steps(2) infinite}
 @keyframes lowp{50%{opacity:.45}}
 .feed{color:#ff3d8b;font-weight:700}
+#mod .rule{display:block;font-size:11px;letter-spacing:.06em;color:#9b998f;font-weight:600;margin-top:2px}
+#mod .sw{display:inline-block;width:9px;height:9px;border-radius:2px;margin-right:5px;vertical-align:-1px}
 @media (prefers-reduced-motion:reduce){#caption,#fill{transition:none}#mod.low,#mod.low b{animation:none}}
 </style>
 </head>
@@ -111,25 +113,25 @@ const HP = 5.08, U3 = 128.5;
 
 // Panels. x/y are fractions of the panel; knob = [x,y,radius mm,label], jack = [x,y,label]. The last jack is the module's OUT.
 const MODS = {
-  VCO:{ name:'Origin', hp:10, field:null,
+  VCO:{ name:'Origin', hp:10, field:'chain', rule:'Chain pickups quickly. Each one in a row is worth more, up to 2×.',
     knobs:[[.5,.17,6.2,'FREQ'],[.5,.42,4.2,'FINE'],[.28,.6,3.0,'PW'],[.72,.6,3.0,'FM']],
     jacks:[[.25,.76,'1V/OCT'],[.75,.76,'SYNC'],[.2,.89,'SAW'],[.5,.89,'SQR'],[.8,.89,'OUT']] },
-  LFO:{ name:'Tide', hp:12, field:'tide',
+  LFO:{ name:'Tide', hp:12, field:'tide', rule:'Roll with the current for 1.5× growth. Against it, only 0.6×.',
     knobs:[[.5,.2,7.0,'RATE'],[.3,.47,4.0,'SHAPE'],[.7,.47,4.0,'DEPTH']],
     jacks:[[.22,.72,'RESET'],[.5,.72,'CV'],[.78,.72,'TRI'],[.3,.88,'SQR'],[.7,.88,'OUT']] },
-  SEQ:{ name:'Steps', hp:16, field:'steps',
+  SEQ:{ name:'Steps', hp:16, field:'steps', rule:'Each lit step sprays a part. Accent steps 4 and 8 kick hard and knock one off you.',
     knobs:[[.25,.2,4.2,'RATE'],[.75,.2,4.2,'LENGTH']],
     jacks:[[.2,.9,'CLK'],[.4,.9,'RESET'],[.6,.9,'GATE'],[.8,.9,'OUT']] },
-  VCF:{ name:'Resonance', hp:16, field:'peaks',
+  VCF:{ name:'Resonance', hp:16, field:'peaks', rule:'Only parts inside the passband color stick. The cutoff sweeps around the spectrum.',
     knobs:[[.5,.17,8.0,'CUTOFF'],[.22,.47,4.6,'RES'],[.78,.47,4.6,'ENV']],
     jacks:[[.2,.72,'IN'],[.4,.72,'CV'],[.6,.72,'FM'],[.8,.72,'Q'],[.3,.88,'LP'],[.7,.88,'OUT']] },
-  ENV:{ name:'Contour', hp:12, field:'adsr',
+  ENV:{ name:'Contour', hp:12, field:'adsr', rule:'Attack is fast. Decay is sticky but worth 1.5×. Release is slippery and leaks 3× faster.',
     knobs:[[.25,.2,3.4,'A'],[.75,.2,3.4,'D'],[.25,.32,3.4,'S'],[.75,.32,3.4,'R']],
     jacks:[[.25,.91,'GATE'],[.75,.91,'OUT']] },
-  VCA:{ name:'Attenuation', hp:20, field:'dark',
+  VCA:{ name:'Attenuation', hp:20, field:'dark', rule:'Your light fades. Glowing parts recharge it.',
     knobs:[[.3,.2,6.5,'GAIN'],[.7,.2,6.5,'BIAS'],[.5,.46,5.0,'RESP']],
     jacks:[[.18,.7,'IN 1'],[.39,.7,'CV 1'],[.61,.7,'IN 2'],[.82,.7,'CV 2'],[.3,.87,'MIX'],[.7,.87,'OUT']] },
-  DLY:{ name:'Echo', hp:14, field:'echo',
+  DLY:{ name:'Echo', hp:14, field:'echo', rule:'Echoes only collect the same kind of part you picked up last.',
     knobs:[[.3,.2,5.0,'TIME'],[.7,.2,5.0,'FDBK'],[.5,.46,4.0,'MIX']],
     jacks:[[.2,.7,'IN'],[.4,.7,'CLK'],[.6,.7,'CV'],[.8,.7,'WET'],[.3,.87,'DRY'],[.7,.87,'OUT']] },
   OUT:{ name:'Release', hp:28, field:null,
@@ -159,7 +161,7 @@ const LEVELS = [
       "The lit step shoves whatever stands on it toward the next one. Ride the carousel or get thrown off it.",
       "<em>Somewhere in here is a ticket stub from 1979.</em>"],
     line0:"Eight steps and back to the start. I had a routine like this. Coffee, bench, solder, bed." },
-  { mods:['VCF'], start:3, goal:10, pulseEvery:6, bars:46, chasers:2, scrollers:5,
+  { mods:['VCF'], start:3, goal:10, pulseEvery:6, bars:52, chasers:1, scrollers:5,
     mix:{screw:2,nut:2,cap:2,res:2,led:3,chip:2,knobcap:3,plug:2,wave:2,spark:2,scope:2,heart:2,badge:1},
     memento:{t:'photo',name:'a photograph',line:"Jonas, age six, in headphones bigger than his head. He listened to everything, then."},
     intro:["A filter decides what gets through. Turn the resonance up and it starts to ring on its own, singing at the one frequency it can't let go of.",
@@ -314,7 +316,7 @@ function buildLevel(i){
   let x0=0; G.panels = L.mods.map(id=>{ const m=MODS[id], w=m.hp*HP, p={id,m,x0,w,field:m.field}; x0+=w; return p; });
   const W=G.W=x0;
   G.items=[]; G.att=[]; G.fx=[]; G.pulses=[]; G.scrollers=[]; G.peaks=[]; G.pads=[]; G.trail=[]; G.echoes=[];
-  G.mass=0; G.ready=false; G.warn=null; G.armed=false; G.lastBar=-1; G.heat=0; G.leakAcc=0; G.warned8=false; G.barsLeft=L.bars;
+  G.mass=0; G.ready=false; G.warn=null; G.armed=false; G.lastBar=-1; G.heat=0; G.leakAcc=0; G.warned8=false; G.barsLeft=L.bars; G.chain=0; G.lastPickT=-9; G.lastT=null; G.light=1; G.lastStep=-1; G.spawned=0;
   G.lookedUp0=G.lookedUp; G.jonas0=G.jonas; G.keep0=G.keepsakes; G.got0=G.got.slice();
   G.pulseT = L.pulseEvery*0.6; G.t=0; G.talkCool=0; G.growNext=.3; G.won=false; G.readySaid=false;
   G.knobs=[]; G.jacks=[];
@@ -332,7 +334,7 @@ function buildLevel(i){
     const o=G.jacks.find(j=>j.out); if(freeAt(x,y,4)&&Math.hypot(x-b.x,y-b.y)>12&&Math.hypot(x-o.x,y-o.y)>16){ G.peaks.push({x,y,r:2.2,ph:rand(0,6),f:rand(.7,1.4)}); break; } } }
   // items: heavy-tailed sizes so there's always something your size
   G.kM=[.9,.8,.7,.6,.55,.5,.47,.42][i];
-  const lo=L.start*.22, hi=L.goal*(.55-.03*i), need=(L.goal*L.goal-L.start*L.start)/(G.kM*Math.min(G.growth,1))*(i<3?3:2.2)*(L.rack?2.6:1), cap=L.rack?2000:720;
+  const lo=L.start*.22, hi=L.goal*(.55-.03*i), need=(L.goal*L.goal-L.start*L.start)/(G.kM*Math.min(G.growth,1))*(i<3?3:2.2)*(L.rack?2.6:1)*(L.mods[0]==='VCF'&&!L.rack?1.9:1), cap=L.rack?2000:720;
   let sum=0, guard=0;
   while(sum<need && G.items.length<cap && guard++<12000){
     const s = lo*Math.pow(hi/lo, Math.pow(rnd(),1.7));
@@ -373,10 +375,12 @@ function mkItem(t,x,y,s){
 
 // ----- growth / shedding -----
 function recompute(){ const b=G.ball; b.r=Math.min((G.H-14)/2, Math.sqrt(G.L.start*G.L.start + G.kM*G.growth*G.mass)); }
-function attach(it){
+function attach(it,byEcho){
   burst(it.x,it.y,it.col||'#ffb547',it.s);
-  const b=G.ball, a=Math.atan2(it.y-b.y,it.x-b.x)-b.spin;
-  const w=DIGITAL[it.t]?2:1; if(w>1) G.heat=Math.min(3,G.heat+Math.min(1,it.s/b.r*2.2));
+  const b=G.ball, a=Math.atan2(it.y-b.y,it.x-b.x)-b.spin, mult=pickMult();
+  if(it.spawn) G.spawned--; if(GLOWS[it.t]) G.light=Math.min(1,G.light+.2);
+  if(!byEcho){ G.lastT=it.t; G.chain=G.t-G.lastPickT<1?G.chain+1:0; G.lastPickT=G.t; }
+  const w=(DIGITAL[it.t]?2:1)*mult; if(w>1) G.heat=Math.min(3,G.heat+Math.min(1,it.s/b.r*2.2));
   G.att.push({t:it.t,s:it.s,col:it.col,seed:it.seed,rot:it.rot-b.spin,ang:a,d:b.r*rand(.86,1.0),mem:it.mem,w});
   G.mass+=it.s*it.s*w; recompute();
   sfxPick(it.s/b.r, it.t);
@@ -418,8 +422,12 @@ function update(dt){
   const damp=Math.exp(-2.1*zf.damp*dt); b.vx*=damp; b.vy*=damp;
   // sequencer: the lit step shoves you toward the next one
   const st=activeStep();
+  if(st!==G.lastStep){ G.lastStep=st; for(const pd of G.pads){ if(pd.i!==st || Math.abs(pd.x-b.x)>160) continue; const acc8=pd.i%4===3;
+      for(let k=0;k<(acc8?3:1) && G.spawned<30;k++){ const s=b.r*rand(.08,.2), a=rand(0,6.283), it=mkItem(wpick(L.mix),pd.x+Math.cos(a)*pd.r*.6,pd.y+Math.sin(a)*pd.r*.6,s);
+        it.vx=Math.cos(a)*b.r*rand(3,7); it.vy=Math.sin(a)*b.r*rand(3,7); it.cool=.2; it.spawn=true; G.spawned++; G.items.push(it); }
+      if(acc8){ const dx=b.x-pd.x, dy=b.y-pd.y, dd=Math.hypot(dx,dy)||1; if(dd<pd.r+b.r*.4){ shed(1,dx/dd,dy/dd,b.r*6); sfxThud(.5); } } } }
   for(const pd of G.pads){ if(pd.i!==st) continue; const dx=b.x-pd.x, dy=b.y-pd.y; if(dx*dx+dy*dy<(pd.r+b.r*.4)**2){ const nx=G.pads.find(q=>q.p===pd.p&&q.i===(st+1)%8);
-      const ux=nx.x-pd.x, uy=nx.y-pd.y, m=Math.hypot(ux,uy); b.vx+=ux/m*acc*2.4*dt; b.vy+=uy/m*acc*2.4*dt; } }
+      const ux=nx.x-pd.x, uy=nx.y-pd.y, m=Math.hypot(ux,uy); const kk=pd.i%4===3?4.8:2.4; b.vx+=ux/m*acc*kk*dt; b.vy+=uy/m*acc*kk*dt; } }
   b.x+=b.vx*dt; b.y+=b.vy*dt;
   const sp=Math.hypot(b.vx,b.vy);
   b.spin += (b.vx>=0?1:-1)*sp/Math.max(b.r,.1)*dt*.8;
@@ -428,7 +436,7 @@ function update(dt){
   if(b.x<b.r){b.x=b.r;b.vx=Math.abs(b.vx)*.45;} if(b.x>W-b.r){b.x=W-b.r;b.vx=-Math.abs(b.vx)*.45;}
   if(b.y<b.r+5){b.y=b.r+5;b.vy=Math.abs(b.vy)*.45;} if(b.y>H-b.r-5){b.y=H-b.r-5;b.vy=-Math.abs(b.vy)*.45;}
   // darkness and echoes follow whichever panel you're in
-  G.darkA+=((here.field==='dark'?1:0)-G.darkA)*Math.min(1,dt*2.5);
+  G.darkA+=((here.field==='dark'?1:0)-G.darkA)*Math.min(1,dt*2.5); if(here.field==='dark') G.light=Math.max(.12,G.light-dt*.03);
   G.echoA+=((here.field==='echo'?1:0)-G.echoA)*Math.min(1,dt*2.5);
   G.trail.push([G.t,b.x,b.y]); while(G.trail.length>2&&G.trail[0][0]<G.t-1.2) G.trail.shift();
   G.echoes.length=0; if(G.echoA>.05) for(const [lag,k] of [[.42,.66],[.84,.46]]){ const p=trailAt(G.t-lag); G.echoes.push({x:p[1],y:p[2],r:b.r*k,a:G.echoA}); }
@@ -439,7 +447,7 @@ function update(dt){
   // resonance peaks
   if(b.r<=L.goal*.8) for(const p of G.peaks){ const pr=p.r*(1+.35*Math.sin(G.t*3*p.f+p.ph)); const dx=b.x-p.x, dy=b.y-p.y, d=Math.hypot(dx,dy), m=pr+b.r;
     if(d<m && d>0){ const nx=dx/d, ny=dy/d; b.x=p.x+nx*m; b.y=p.y+ny*m; const kick=b.r*9+12;
-      b.vx=nx*kick; b.vy=ny*kick; if(rnd()<.65) shed(1,nx,ny,kick*.5); sfxPeak(); } }
+      b.vx=nx*kick; b.vy=ny*kick; if(rnd()<.4) shed(1,nx,ny,kick*.5); sfxPeak(); } }
   // items
   const pickR=b.r*.5, echoOn=G.echoA>.5;
   for(let i=G.items.length-1;i>=0;i--){ const it=G.items[i];
@@ -455,10 +463,11 @@ function update(dt){
       if(it.x<it.s){it.x=it.s;it.vx*=-.5} if(it.x>W-it.s){it.x=W-it.s;it.vx*=-.5} if(it.y<it.s+5){it.y=it.s+5;it.vy*=-.5} if(it.y>H-it.s-5){it.y=H-it.s-5;it.vy*=-.5}
       if(Math.abs(it.vx)+Math.abs(it.vy)<.02 && !inTide && it.t!=='spark'){it.vx=0;it.vy=0;} }
     // echoes collect for you
-    if(echoOn && it.cool<=0){ let got=false; for(const e of G.echoes){ if(it.s>e.r*.5) continue; const ex=it.x-e.x, ey=it.y-e.y, lim=e.r+it.s*.7;
-        if(ex*ex+ey*ey<lim*lim){ got=true; break; } } if(got){ G.items.splice(i,1); attach(it); continue; } }
+    if(echoOn && it.cool<=0 && it.t===G.lastT && canStick(it)){ let got=false; for(const e of G.echoes){ if(it.s>e.r*.5) continue; const ex=it.x-e.x, ey=it.y-e.y, lim=e.r+it.s*.7;
+        if(ex*ex+ey*ey<lim*lim){ got=true; break; } } if(got){ G.items.splice(i,1); attach(it,true); continue; } }
     const dx=it.x-b.x, dy=it.y-b.y; const lim=b.r+it.s*.7; if(Math.abs(dx)>lim||Math.abs(dy)>lim) continue;
     const d=Math.hypot(dx,dy); if(d>=lim) continue;
+    if(it.s<=pickR && !canStick(it)) continue; // outside the passband: you roll straight through it
     if(it.s<=pickR && it.cool<=0){ G.items.splice(i,1); attach(it); continue; }
     // too big: shove it, get shoved back (mass ∝ area)
     const nx=dx/(d||1), ny=dy/(d||1), mb=b.r*b.r, mi=it.s*it.s, vn=(b.vx-(it.vx||0))*nx+(b.vy-(it.vy||0))*ny;
@@ -484,9 +493,12 @@ function update(dt){
   G.talkCool-=dt;
   for(const s of G.scrollers){ s.cool-=dt; s.sayT-=dt;
     if(s.chaser && !s.woke){ s.stun-=dt; const dx=b.x-s.x, dy=b.y-s.y, d=Math.hypot(dx,dy)||1, term=acc/2.1;
-      if(s.state==='idle' && s.stun<=0 && d<s.h*5 && sp>term*.3){ s.state='chase'; s.chaseT=6; s.say=pick(CHASE); s.sayT=2.5; sfxRec();
+      if(s.state==='idle' && s.stun<=0 && d<s.h*5 && sp>term*.3 && b.r<=s.cr*2.4){ s.state='chase'; s.chaseT=6; s.say=pick(CHASE); s.sayT=2.5; sfxRec();
         if(G.talkCool<=0){ G.talkCool=2.4; say('Scroller',s.say,true,2.5); } }
       if(s.state==='chase'){ s.chaseT-=dt; s.vx+=dx/d*acc*.62*dt; s.vy+=dy/d*acc*.62*dt; s.tx=s.x; s.ty=s.y; if(s.chaseT<=0||d>s.h*10){ s.state='idle'; s.stun=4; } } }
+    const giant=b.r>s.cr*2.4, gx=s.x-b.x, gy=s.y-b.y, gd=Math.hypot(gx,gy)||1;
+    if(giant && s.state==='chase'){ s.state='idle'; s.stun=5; }
+    if(giant && !s.woke && !G.L.wake && gd<b.r+s.h*2){ s.vx+=gx/gd*s.h*1.2*dt; s.vy+=gy/gd*s.h*1.2*dt; } // they scatter from something that big
     if(s.chaser && s.state==='chase' && !s.woke){ /* chasing: skip wandering */ }
     else if(s.woke){ // drift toward the ball, to listen
       const dx=b.x-s.x, dy=b.y-s.y, d=Math.hypot(dx,dy), want=b.r+s.h*.9; if(d>want){ s.vx+=dx/d*s.h*.25*dt; s.vy+=dy/d*s.h*.25*dt; } }
@@ -494,6 +506,9 @@ function update(dt){
       const dx=s.tx-s.x, dy=s.ty-s.y, d=Math.hypot(dx,dy)||1; s.vx+=dx/d*s.h*.04*dt; s.vy+=dy/d*s.h*.04*dt; }
     const dd=Math.exp(-2*dt); s.vx*=dd; s.vy*=dd; s.x=clamp(s.x+s.vx*dt,6,W-6); s.y=clamp(s.y+s.vy*dt,H*.12,H-7);
     const dx=s.x-b.x, dy=s.y-b.y, d=Math.hypot(dx,dy), m=s.cr+b.r;
+    if(d<m && d>0 && b.r>s.cr*2.4){ // swept aside; you don't even slow down
+      const nx=dx/d, ny=dy/d, sv=Math.max(Math.hypot(b.vx,b.vy),b.r*2); s.x+=nx*(m-d); s.y+=ny*(m-d); s.vx+=nx*sv*.8; s.vy+=ny*sv*.8;
+      if(G.L.wake && !s.woke && s.cool<=0){ s.cool=3; bumpScroller(s,nx,ny); } continue; }
     if(d<m && d>0){ const nx=dx/d, ny=dy/d, over=m-d; s.x+=nx*over*.5; s.y+=ny*over*.5; b.x-=nx*over*.5; b.y-=ny*over*.5;
       const vn=b.vx*nx+b.vy*ny, rel=vn-(s.vx*nx+s.vy*ny), term=acc/2.1;
       if(s.chaser && !s.woke && !(b.r>s.cr*1.5 && rel>term*.35)){
@@ -509,7 +524,7 @@ function update(dt){
   }
   // the release stage: parts drift off on their own, faster after junk food
   G.heat*=Math.exp(-dt/7);
-  if(b.r>L.start*1.15){ G.leakAcc+=(G.li===0?0:.08+.025*G.li)*(1+G.heat*1.2)*dt; if(G.leakAcc>=1){ G.leakAcc-=1; leakOne(); } }
+  if(b.r>L.start*1.15){ G.leakAcc+=(G.li===0?0:.08+.025*G.li)*(1+G.heat*1.2)*(band===3?3:1)*dt; if(G.leakAcc>=1){ G.leakAcc-=1; leakOne(); } }
   // the clock, counted in bars of the kick
   G.barsLeft=L.bars-G.t/BAR;
   if(!G.warned8 && G.barsLeft<=8){ G.warned8=true; say('Otto',G.ready?"Eight bars left. Get to the OUT jack.":"Eight bars left. The release is coming.",false,4); }
@@ -538,6 +553,18 @@ function leakOne(){ const b=G.ball, cand=[]; for(let i=Math.max(0,G.att.length-6
   const ang=a.ang+b.spin, ox=Math.cos(ang), oy=Math.sin(ang);
   G.items.push({t:a.t,s:a.s,col:a.col,seed:a.seed,rot:a.rot+b.spin,x:b.x+ox*(b.r+a.s+.2),y:b.y+oy*(b.r+a.s+.2),vx:b.vx+ox*b.r*1.5,vy:b.vy+oy*b.r*1.5,vr:rand(-4,4),cool:1.5});
   recompute(); if(G.ready && b.r<G.L.goal) G.ready=false; }
+
+// ----- module rules -----
+function tideMult(){ const b=G.ball; if(panelAt(b.x).field!=='tide') return 1; const [fx,fy]=fieldAt(b.x,b.y,G.t), v=Math.hypot(b.vx,b.vy), F=Math.hypot(fx,fy);
+  if(v<b.r*.6||!F) return 1; const c=(b.vx*fx+b.vy*fy)/(v*F); return c>.35?1.5:c<-.35?.6:1; }
+function pickMult(){ const b=G.ball, f=panelAt(b.x).field; let m=1;
+  if(f==='chain' && G.t-G.lastPickT<1) m=1+.2*Math.min(5,G.chain+1);
+  m*=tideMult(); if(f==='adsr' && adsrBand(b.x,b.y)===1) m*=1.5; return m; }
+function passHue(){ return (G.t*14)%360; }
+function hueOf(hex){ const r=parseInt(hex.slice(1,3),16)/255, g=parseInt(hex.slice(3,5),16)/255, bl=parseInt(hex.slice(5,7),16)/255, mx=Math.max(r,g,bl), mn=Math.min(r,g,bl), d=mx-mn;
+  if(!d) return 0; const h= mx===r?((g-bl)/d)%6 : mx===g?(bl-r)/d+2 : (r-g)/d+4; return (h*60+360)%360; }
+function inBand(it){ if(it.hue==null) it.hue=hueOf(it.col||'#888888'); let d=Math.abs(it.hue-passHue())%360; if(d>180) d=360-d; return d<=75; }
+function canStick(it){ if(it.mem) return true; return panelAt(it.x).field!=='peaks' || inBand(it); }
 // ===== RENDER =====
 const cv=document.getElementById('c'), cx=cv.getContext('2d');
 let VW=0,VH=0,DPR=1; const fog=document.createElement('canvas'), fx=fog.getContext('2d');
@@ -584,6 +611,7 @@ function render(){
       for(let y=8;y<H-6;y+=7) for(let x=p.x0+4;x<p.x0+p.w;x+=7){ const [a,c]=fieldAt(x,y,t), mm=Math.hypot(a,c)||1, l=2.4;
         const ph=((t*.8+x*.13+y*.07)%1); cx.moveTo(SX(x+a/mm*l*ph),SY(y+c/mm*l*ph)); cx.lineTo(SX(x+a/mm*l*(ph+.5)),SY(y+c/mm*l*(ph+.5))); } cx.stroke(); }
     if(p.field==='adsr') drawADSR(p);
+    if(p.field==='peaks') drawPassband(p);
   }
   drawPads();
   // knobs
@@ -599,7 +627,8 @@ function render(){
   for(const it of G.items){ const x=SX(it.x), y=SY(it.y), s=it.s*z; if(x<-pad-s||x>VW+pad+s||y<-pad-s||y>VH+pad+s) continue;
     if(s<.6){ cx.fillStyle=it.col||'#86827a'; cx.fillRect(x-.5,y-.5,1.5,1.5); continue; }
     const big=it.s>b.r*.5;
-    cx.save(); cx.translate(x,y); cx.rotate(it.rot);
+    const dim=!it.mem && panelAt(it.x).field==='peaks' && !inBand(it);
+    cx.save(); if(dim) cx.globalAlpha=.25; cx.translate(x,y); cx.rotate(it.rot);
     if(it.mem){ cx.shadowColor='#ffb547'; cx.shadowBlur=10+6*Math.sin(t*4); }
     drawItem(it,s); cx.restore();
     if(big && it.s<b.r*1.2 && s>6){ cx.strokeStyle='rgba(235,230,217,.18)'; cx.lineWidth=1; cx.beginPath(); cx.arc(x,y,s*1.15,0,7); cx.stroke(); } }
@@ -681,12 +710,16 @@ function drawBall(){ const b=G.ball, z=CAM.z, x=SX(b.x), y=SY(b.y), r=b.r*z;
   const att=G.att, start=Math.max(0,att.length-220);
   for(let i=start;i<att.length;i++){ const a=att[i]; if(a.d<b.r*.6 && !a.mem) continue; const an=a.ang+b.spin, d=Math.min(a.d,b.r)*z, s=a.s*z; if(s<.8) continue;
     cx.save(); cx.translate(x+Math.cos(an)*d,y+Math.sin(an)*d); cx.rotate(a.rot+b.spin); drawItem(a,s); cx.restore(); }
+  const fl=panelAt(b.x).field;
+  if(fl==='chain' && G.chain>0 && G.t-G.lastPickT<1){ cx.font=`700 ${Math.max(13,r*.5)}px "Barlow Condensed",sans-serif`; cx.fillStyle='#ffb547'; cx.textAlign='center'; cx.textBaseline='bottom';
+    cx.globalAlpha=1-(G.t-G.lastPickT); cx.fillText('×'+(1+.2*Math.min(5,G.chain)).toFixed(1),x,y-r*1.15); cx.globalAlpha=1; }
+  if(fl==='tide'){ const m=tideMult(); if(m!==1){ cx.strokeStyle=m>1?'#33e1ff':'#ff4b3a'; cx.globalAlpha=.6; cx.lineWidth=2; cx.setLineDash([4,4]); cx.beginPath(); cx.arc(x,y,r*1.25,0,7); cx.stroke(); cx.setLineDash([]); cx.globalAlpha=1; } }
   if(b.hurt>0){ cx.strokeStyle=`rgba(255,181,71,${b.hurt*2})`; cx.lineWidth=3; cx.beginPath(); cx.arc(x,y,r*1.15,0,7); cx.stroke(); } }
 
 function drawFog(){ fx.setTransform(DPR,0,0,DPR,0,0); fx.globalCompositeOperation='source-over'; fx.clearRect(0,0,VW,VH);
   fx.fillStyle=`rgba(4,5,6,${.94*G.darkA})`; fx.fillRect(0,0,VW,VH); fx.globalCompositeOperation='destination-out';
   const hole=(x,y,r,a)=>{ const g=fx.createRadialGradient(x,y,0,x,y,r); g.addColorStop(0,`rgba(0,0,0,${a})`); g.addColorStop(1,'rgba(0,0,0,0)'); fx.fillStyle=g; fx.beginPath(); fx.arc(x,y,r,0,7); fx.fill(); };
-  const b=G.ball, z=CAM.z; hole(SX(b.x),SY(b.y),b.r*z*(6.5+.3*Math.sin(G.t*7)),1);
+  const b=G.ball, z=CAM.z; hole(SX(b.x),SY(b.y),b.r*z*(2.2+4.6*G.light+.3*Math.sin(G.t*7)),1);
   for(const s of G.scrollers) hole(SX(s.x),SY(s.y-s.h*.6),s.h*z*.6,.8);
   let lit=0; for(const it of G.items){ if(!GLOWS[it.t]) continue; const x=SX(it.x), y=SY(it.y); if(x<-20||x>VW+20||y<-20||y>VH+20) continue; hole(x,y,Math.max(8,it.s*z*3.2),.6); if(++lit>140) break; }
   for(const p of G.pulses) hole(SX(p.x),SY(p.y),p.R*z,.25);
@@ -728,6 +761,14 @@ function drawEchoes(){ const z=CAM.z; for(const e of G.echoes){ const x=SX(e.x),
   cx.save(); cx.globalAlpha=.35*e.a; cx.translate(x,y); glow('#33e1ff',r*1.6,.5); cx.restore();
   cx.save(); cx.globalAlpha=.4*e.a; cx.strokeStyle='#33e1ff'; cx.lineWidth=Math.max(1.5,r*.08); cx.setLineDash([r*.3,r*.2]);
   cx.beginPath(); cx.arc(x,y,r,G.t*2,G.t*2+6.283); cx.stroke(); cx.setLineDash([]); cx.restore(); } }
+
+// filter passband: a spectrum strip with the window that currently lets parts stick
+function drawPassband(p){ const z=CAM.z, PY=G.H*.6, y=SY(PY), x0=SX(p.x0+p.w*.12), w=p.w*.76*z, h=Math.max(3,1.6*z);
+  for(let i=0;i<36;i++){ cx.fillStyle=`hsl(${i*10},90%,${45}%)`; cx.globalAlpha=.35; cx.fillRect(x0+w*i/36,y,w/36+1,h); } cx.globalAlpha=1;
+  const c=passHue(), u=c/360, bw=150/360; cx.strokeStyle='#fff'; cx.lineWidth=Math.max(1,.3*z);
+  for(const off of [0,-1,1]){ const a=x0+w*(u-bw/2+off), bb=x0+w*(u+bw/2+off); const L=Math.max(a,x0), R=Math.min(bb,x0+w); if(R<=L) continue;
+    cx.fillStyle=`hsl(${c},100%,60%)`; cx.globalAlpha=.9; cx.fillRect(L,y,R-L,h); cx.globalAlpha=1; cx.strokeRect(L,y-1,R-L,h+2); }
+  silk('PASSBAND',p.x0+p.w/2,PY+h/z+2.2,1.7,'Barlow Condensed',600,'center','#ebe6d9'); }
 // ===== LIVE PARTS: colour, glow, motion =====
 const NEON=['#ff3d8b','#33e1ff','#b6ff3b','#ff8a1f','#9b6bff','#ffe14d','#ff4b3a','#3dff9a'];
 const ANOD=['#e0457b','#3fa9f5','#f5a623','#7ed321','#9b59ff','#e8e4da','#1fd1b9'];
@@ -972,7 +1013,7 @@ function introCard(i){
   card(`<div class="kicker"><span>${L.rack?'Final level':`Module ${i+1} / ${LAST}`}</span><span>${hp} HP · ${(hp*HP).toFixed(1)} mm</span></div>
     <h2 class="ctitle">${lvlId(L)}</h2><div class="kicker" style="margin-top:-6px"><span>${lvlName(L)}</span></div>
     <div class="cbody">${L.intro.map(p=>`<p>${p}</p>`).join('')}</div>
-    <dl class="specs"><dt>Start</dt><dd>Ø ${(L.start*2).toFixed(1)} mm</dd><dt>Target</dt><dd>Ø ${(L.goal*2).toFixed(1)} mm</dd><dt>Time</dt><dd>${L.bars} bars · ${Math.round(L.bars*BAR)} s</dd><dt>Hunters</dt><dd>${L.chasers||'none'}</dd><dt>Keepsake</dt><dd>${L.memento.name}, somewhere</dd></dl>${dial()}`,
+    <dl class="specs"><dt>Start</dt><dd>Ø ${(L.start*2).toFixed(1)} mm</dd><dt>Target</dt><dd>Ø ${(L.goal*2).toFixed(1)} mm</dd><dt>Time</dt><dd>${L.bars} bars · ${Math.round(L.bars*BAR)} s</dd><dt>Rule</dt><dd>${L.rack?'Every module keeps its rule in its own section':MODS[L.mods[0]].rule}</dd><dt>Hunters</dt><dd>${L.chasers||'none'}</dd><dt>Keepsake</dt><dd>${L.memento.name}, somewhere</dd></dl>${dial()}`,
     'Roll', play);
   camUpdate(0,true);
 }
@@ -1005,8 +1046,18 @@ function levelFailed(){ const i=G.li, L=G.L; sfxFade();
 // ===== HUD + LOOP =====
 const $=id=>document.getElementById(id); const H_MOD=$('mod'), H_TXT=$('meterTxt'), H_FILL=$('fill'), H_TK=$('tk'), H_TU=$('tu');
 $('mute').onclick=()=>{ audioInit(); muted=!muted; if(OUTG) OUTG.gain.setTargetAtTime(muted?0:.9,AC.currentTime,.05); $('mute').textContent=muted?'Muted':'Sound'; };
+const TNAME={dust:'dust',solder:'solder',screw:'screws',nut:'nuts',cap:'jumpers',res:'resistors',led:'LEDs',spark:'sparks',wave:'waves',scope:'scopes',seq:'step strips',plug:'plugs',chip:'chips',knobcap:'knob caps',heart:'hearts',badge:'badges',phone:'phones',cable:'cables',ring:'the ring',glasses:'glasses',ticket:'the ticket',photo:'the photo',watch:'the watch',letter:'the letter',drawing:'the drawing',key:'the key'};
+function ruleHud(){ const b=G.ball, f=panelAt(b.x).field;
+  if(f==='chain') return G.chain>0&&G.t-G.lastPickT<1?`chain ×${(1+.2*Math.min(5,G.chain)).toFixed(1)}`:'chain pickups';
+  if(f==='tide'){ const m=tideMult(); return m>1?'with the tide ×1.5':m<1?'against the tide ×0.6':'ride the tide'; }
+  if(f==='steps') return 'catch the step spray';
+  if(f==='peaks') return `<i class="sw" style="background:hsl(${passHue()|0},100%,60%)"></i>passband`;
+  if(f==='adsr'){ return ['attack: fast','decay: sticky ×1.5','sustain','release: leak ×3'][adsrBand(b.x,b.y)]||'envelope floor'; }
+  if(f==='dark') return `light ${Math.round(G.light*100)}%`;
+  if(f==='echo') return G.lastT?`echoes take ${TNAME[G.lastT]||G.lastT}`:'echoes copy your last pickup';
+  return ''; }
 function hud(){ const b=G.ball, L=G.L, p=clamp((b.r-L.start)/(L.goal-L.start),0,1);
-  const pp=panelAt(b.x), bl=Math.max(0,Math.ceil(G.barsLeft)); H_MOD.innerHTML= `<b>${L.rack?'RACK':pp.id}</b> · ${bl} bars`; H_MOD.classList.toggle('low',bl<=8);
+  const pp=panelAt(b.x), bl=Math.max(0,Math.ceil(G.barsLeft)); H_MOD.innerHTML= `<b>${L.rack?'RACK':pp.id}</b> · ${bl} bars<span class="rule">${ruleHud()}</span>`; H_MOD.classList.toggle('low',bl<=8);
   const feed=G.heat>.25?` · <span class="feed">leak ×${(1+G.heat*1.2).toFixed(1)}</span>`:'';
   H_TXT.innerHTML = (G.ready ? `<b>Ø ${(b.r*2).toFixed(1)} mm</b> · roll into OUT` : `Ø <b>${(b.r*2).toFixed(1)}</b> / ${(L.goal*2).toFixed(1)} mm`)+feed;
   H_FILL.style.width=(p*100).toFixed(1)+'%'; H_FILL.classList.toggle('ready',G.ready); H_TK.textContent=G.keepsakes; H_TU.textContent=G.lookedUp; }

@@ -22,16 +22,18 @@ Otto Brandt, 84, repaired synthesizers in Lindenau for fifty-one years. Nobody h
 
 Seven single-module levels, then a final level that spans the whole 128HP rack. Every module keeps its quirk in the final level.
 
-| Level | Module | Twist | What patching it adds to the music |
+| Level | Module | Rule | What patching it adds to the music |
 |---|---|---|---|
-| 1 | VCO · Origin | none | two detuned sawtooth oscillators |
-| 2 | LFO · Tide | a slow current moves you and everything loose | pitch and filter drift |
-| 3 | SEQ · Steps | eight floor pads light on the 8th notes and shove you to the next one | an eight-step melody |
-| 4 | VCF · Resonance | glowing peaks fling you and shake things off | resonant filter sweep |
-| 5 | ENV · Contour | Attack / Decay / Sustain / Release floor bands: fast, sticky, normal, slippery | plucky notes and a bass line on the kick |
-| 6 | VCA · Attenuation | near darkness; only you, the parts and the phones give light | hi-hats, brighter lead |
-| 7 | DLY · Echo | two delayed echoes follow your path and collect for you | dotted-8th delay on the lead |
-| 8 | The whole rack | all of the above, side by side; bump scrollers so they look up | chord progression, pads, bells |
+| 1 | VCO · Origin | chain pickups quickly: each one in a row is worth more, up to 2× | two detuned sawtooth oscillators |
+| 2 | LFO · Tide | a slow current moves everything; rolling with it gives 1.5× growth, against it 0.6× | pitch and filter drift |
+| 3 | SEQ · Steps | lit floor pads shove you round a ring and spray parts; accent steps 4 and 8 kick hard | an eight-step melody |
+| 4 | VCF · Resonance | only parts inside the sweeping passband color stick; resonant peaks fling you | resonant filter sweep |
+| 5 | ENV · Contour | Attack fast, Decay sticky but 1.5×, Sustain normal, Release slippery with 3× leak | plucky notes and a bass line on the kick |
+| 6 | VCA · Attenuation | near darkness; your light fades and glowing parts recharge it | hi-hats, brighter lead |
+| 7 | DLY · Echo | two echoes follow you and collect, but only the kind of part you picked up last | dotted-8th delay on the lead |
+| 8 | The whole rack | every rule in its own section; bump scrollers so they look up | chord progression, pads, bells |
+
+Once you are much bigger than the scrollers, they scatter out of your way and you sweep through them without slowing down. Hunters stop chasing you.
 
 ### The kick
 
